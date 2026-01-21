@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Vasif Asadov">
+
+<title>Linear Regression with R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Linear Regression with R_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Linear Regression with R_files/libs/quarto-html/quarto.js"></script>
+<script src="Linear Regression with R_files/libs/quarto-html/popper.min.js"></script>
+<script src="Linear Regression with R_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Linear Regression with R_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Linear Regression with R_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Linear Regression with R_files/libs/quarto-html/quarto-syntax-highlighting-dark-b53751a350365c71b6c909e95f209ed1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Linear Regression with R_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Linear Regression with R_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Linear Regression with R_files/libs/bootstrap/bootstrap-ff6316f98028e4b07fe1d9a332b01188.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="Linear Regression with R_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="Linear Regression with R_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="Linear Regression with R_files/libs/plotly-binding-4.11.0/plotly.js"></script>
+
+<script src="Linear Regression with R_files/libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="Linear Regression with R_files/libs/jquery-3.5.1/jquery.min.js"></script>
+
+<link href="Linear Regression with R_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="Linear Regression with R_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<link href="Linear Regression with R_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="Linear Regression with R_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preliminary-steps" id="toc-preliminary-steps" class="nav-link active" data-scroll-target="#preliminary-steps">Preliminary steps:</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data Cleaning</a>
+  <ul>
+  <li><a href="#data-types" id="toc-data-types" class="nav-link" data-scroll-target="#data-types">1. Data types:</a></li>
+  <li><a href="#missing-values." id="toc-missing-values." class="nav-link" data-scroll-target="#missing-values.">2. Missing values.</a></li>
+  <li><a href="#duplicates-in-the-data" id="toc-duplicates-in-the-data" class="nav-link" data-scroll-target="#duplicates-in-the-data">3. Duplicates in the data:</a></li>
+  <li><a href="#outliers-in-the-data." id="toc-outliers-in-the-data." class="nav-link" data-scroll-target="#outliers-in-the-data.">4. Outliers in the data.</a></li>
+  </ul></li>
+  <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data Preprocessing</a>
+  <ul>
+  <li><a href="#encode-categoric-features" id="toc-encode-categoric-features" class="nav-link" data-scroll-target="#encode-categoric-features">1. Encode categoric features</a></li>
+  <li><a href="#scale-the-numerical-features" id="toc-scale-the-numerical-features" class="nav-link" data-scroll-target="#scale-the-numerical-features">2. Scale the numerical features</a></li>
+  <li><a href="#multicollinearity" id="toc-multicollinearity" class="nav-link" data-scroll-target="#multicollinearity">3. Multicollinearity</a></li>
+  </ul></li>
+  <li><a href="#modellng" id="toc-modellng" class="nav-link" data-scroll-target="#modellng">Modellng</a>
+  <ul>
+  <li><a href="#prepare-data-for-model" id="toc-prepare-data-for-model" class="nav-link" data-scroll-target="#prepare-data-for-model">1. Prepare data for model</a></li>
+  <li><a href="#fit-the-model" id="toc-fit-the-model" class="nav-link" data-scroll-target="#fit-the-model">2. Fit the model</a></li>
+  <li><a href="#predict-on-the-test-data" id="toc-predict-on-the-test-data" class="nav-link" data-scroll-target="#predict-on-the-test-data">3. Predict on the test data</a></li>
+  </ul></li>
+  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a>
+  <ul>
+  <li><a href="#metrics" id="toc-metrics" class="nav-link" data-scroll-target="#metrics">1. Metrics</a></li>
+  <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting">2. Overfitting</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Linear Regression with R</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Vasif Asadov </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="preliminary-steps" class="level2">
+<h2 class="anchored" data-anchor-id="preliminary-steps">Preliminary steps:</h2>
+<ol type="1">
+<li>Import the packages (libraries):</li>
+</ol>
+<ol start="2" type="1">
+<li>Load the built-in mpg dataset:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mpg <span class="ot">&lt;-</span> ggplot2<span class="sc">::</span>mpg</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mpg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 234 × 11
+   manufacturer model      displ  year   cyl trans drv     cty   hwy fl    class
+   &lt;chr&gt;        &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 audi         a4           1.8  1999     4 auto… f        18    29 p     comp…
+ 2 audi         a4           1.8  1999     4 manu… f        21    29 p     comp…
+ 3 audi         a4           2    2008     4 manu… f        20    31 p     comp…
+ 4 audi         a4           2    2008     4 auto… f        21    30 p     comp…
+ 5 audi         a4           2.8  1999     6 auto… f        16    26 p     comp…
+ 6 audi         a4           2.8  1999     6 manu… f        18    26 p     comp…
+ 7 audi         a4           3.1  2008     6 auto… f        18    27 p     comp…
+ 8 audi         a4 quattro   1.8  1999     4 manu… 4        18    26 p     comp…
+ 9 audi         a4 quattro   1.8  1999     4 auto… 4        16    25 p     comp…
+10 audi         a4 quattro   2    2008     4 manu… 4        20    28 p     comp…
+# ℹ 224 more rows</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Investigate the data and features:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mpg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "manufacturer" "model"        "displ"        "year"         "cyl"         
+ [6] "trans"        "drv"          "cty"          "hwy"          "fl"          
+[11] "class"       </code></pre>
+</div>
+</div>
+<p>Data has the following features:</p>
+<ul>
+<li><p><code>manufacturer</code> - Name of car manufacturer</p></li>
+<li><p><code>model</code> - Specific car model name</p></li>
+<li><p><code>displ</code> - Engine displacemeent, measured in liters. Displacement roughly tells you how much air/fuel mixture the engine can burn in one cycle — higher displacement typically means more power but also higher fuel consumption.</p></li>
+<li><p><code>year</code> - Year of manufacture</p></li>
+<li><p><code>cyl</code> - Number of cylinders in the engine.</p></li>
+<li><p><code>trans</code> - Transmission type.</p></li>
+<li><p><code>drv</code> - The drive type. It can be front-wheel, rear-wheel or 4-wheel drive car.</p></li>
+<li><p><code>cty</code> - City miles per gallon (mpg), meaning fuel efficiency when driving in city conditions (lower speeds, more stops).</p></li>
+<li><p><code>hwy</code> - Highway miles per gallon (mpg), efficiency during highway driving (steady speeds, less stopping).</p></li>
+<li><p><code>fl</code> - Fuel type: premium, regular, diesel, ethanol (E85), compressed natural gas (CNG).</p></li>
+<li><p><code>class</code> - Vehicle type/category, e.g.&nbsp;‘compact’, ‘suv’, ‘midsize’ and etc.</p></li>
+</ul>
+<p>In this project, I will build Linear Regression model to predict the <code>cty</code> based on the remaining features. So, the target variable is <code>cty</code>. Let’s for simplicity, readibility and interpretability, rename the columns and make them clean and meaningful.</p>
+<ol start="4" type="1">
+<li>Rename column names:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> mpg <span class="sc">%&gt;%</span> <span class="fu">rename</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">displacement =</span> displ, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cylinders =</span> cyl,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">transmission_type =</span> trans,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">drive_type =</span> drv,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">city_mpg =</span> cty,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">highway_mpg =</span> hwy,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">fuel_type =</span> fl</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "manufacturer"      "model"             "displacement"     
+ [4] "year"              "cylinders"         "transmission_type"
+ [7] "drive_type"        "city_mpg"          "highway_mpg"      
+[10] "fuel_type"         "class"            </code></pre>
+</div>
+</div>
+</section>
+<section id="data-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="data-cleaning">Data Cleaning</h2>
+<section id="data-types" class="level3">
+<h3 class="anchored" data-anchor-id="data-types">1. Data types:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [234 × 11] (S3: tbl_df/tbl/data.frame)
+ $ manufacturer     : chr [1:234] "audi" "audi" "audi" "audi" ...
+ $ model            : chr [1:234] "a4" "a4" "a4" "a4" ...
+ $ displacement     : num [1:234] 1.8 1.8 2 2 2.8 2.8 3.1 1.8 1.8 2 ...
+ $ year             : int [1:234] 1999 1999 2008 2008 1999 1999 2008 1999 1999 2008 ...
+ $ cylinders        : int [1:234] 4 4 4 4 6 6 6 4 4 4 ...
+ $ transmission_type: chr [1:234] "auto(l5)" "manual(m5)" "manual(m6)" "auto(av)" ...
+ $ drive_type       : chr [1:234] "f" "f" "f" "f" ...
+ $ city_mpg         : int [1:234] 18 21 20 21 16 18 18 18 16 20 ...
+ $ highway_mpg      : int [1:234] 29 29 31 30 26 26 27 26 25 28 ...
+ $ fuel_type        : chr [1:234] "p" "p" "p" "p" ...
+ $ class            : chr [1:234] "compact" "compact" "compact" "compact" ...</code></pre>
+</div>
+</div>
+</section>
+<section id="missing-values." class="level3">
+<h3 class="anchored" data-anchor-id="missing-values.">2. Missing values.</h3>
+<p>We can check missing values with multiple ways, but I prefer doing it by either <code>naniar</code> library or <code>inspectdf</code> library.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">miss_var_summary</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11 × 3
+   variable          n_miss pct_miss
+   &lt;chr&gt;              &lt;int&gt;    &lt;num&gt;
+ 1 manufacturer           0        0
+ 2 model                  0        0
+ 3 displacement           0        0
+ 4 year                   0        0
+ 5 cylinders              0        0
+ 6 transmission_type      0        0
+ 7 drive_type             0        0
+ 8 city_mpg               0        0
+ 9 highway_mpg            0        0
+10 fuel_type              0        0
+11 class                  0        0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># print(inspect_na(df)) # same with miss_var_summary() with slight column name change.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>According to the results, the data doesn’t have any missing values. Therefore, I will not apply any imputation method.</p>
+</section>
+<section id="duplicates-in-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="duplicates-in-the-data">3. Duplicates in the data:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 9</code></pre>
+</div>
+</div>
+<p>There are 9 duplicated rows in the data. Let’s see those rows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df[<span class="fu">duplicated</span>(df), ] </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 11
+  manufacturer model   displacement  year cylinders transmission_type drive_type
+  &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt; &lt;int&gt;     &lt;int&gt; &lt;chr&gt;             &lt;chr&gt;     
+1 chevrolet    c1500 …          5.3  2008         8 auto(l4)          r         
+2 dodge        carava…          3.3  1999         6 auto(l4)          f         
+3 dodge        carava…          3.3  2008         6 auto(l4)          f         
+4 dodge        dakota…          4.7  2008         8 auto(l5)          4         
+5 dodge        durang…          4.7  2008         8 auto(l5)          4         
+6 dodge        ram 15…          4.7  2008         8 auto(l5)          4         
+7 dodge        ram 15…          4.7  2008         8 manual(m6)        4         
+8 ford         explor…          4    1999         6 auto(l5)          4         
+9 honda        civic            1.6  1999         4 auto(l4)          f         
+# ℹ 4 more variables: city_mpg &lt;int&gt;, highway_mpg &lt;int&gt;, fuel_type &lt;chr&gt;,
+#   class &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p>When looking at the results, it is seen that the rows are don’t identical to each other. That may confuse us, but be attentive, because these are the copies of the original rows. If it is required to see all duplicated rows including both of thee original and copies, then it is required to write additional parameter <code>fromLast = TRUE</code>. That will give all the duplicates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df[<span class="fu">duplicated</span>(df) <span class="sc">|</span> <span class="fu">duplicated</span>(df, <span class="at">fromLast =</span> <span class="cn">TRUE</span>), ] <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 11
+  manufacturer model   displacement  year cylinders transmission_type drive_type
+  &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt; &lt;int&gt;     &lt;int&gt; &lt;chr&gt;             &lt;chr&gt;     
+1 chevrolet    c1500 …          5.3  2008         8 auto(l4)          r         
+2 chevrolet    c1500 …          5.3  2008         8 auto(l4)          r         
+3 dodge        carava…          3.3  1999         6 auto(l4)          f         
+4 dodge        carava…          3.3  1999         6 auto(l4)          f         
+5 dodge        carava…          3.3  2008         6 auto(l4)          f         
+6 dodge        carava…          3.3  2008         6 auto(l4)          f         
+# ℹ 4 more variables: city_mpg &lt;int&gt;, highway_mpg &lt;int&gt;, fuel_type &lt;chr&gt;,
+#   class &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p>Let’s remove the duplicated rows now keeping only one of them and removing the copies.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># df &lt;- distinct(df) # tidyverse library</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">duplicated</span>(df),] <span class="co"># base R</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Re-check the number of duplicates to see if any duplicated left:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section>
+<section id="outliers-in-the-data." class="level3">
+<h3 class="anchored" data-anchor-id="outliers-in-the-data.">4. Outliers in the data.</h3>
+<p>We have three methods to define the outliers: box-plot, Z-score and IQR method. Let’s start with box-plot method to visually see if any outliers exist:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>num_cols <span class="ot">=</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(num_cols)) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">'Variable'</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">'Value'</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Variable, <span class="at">y =</span> Value)) <span class="sc">+</span> </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Variable, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),  <span class="co"># hides repetitive x labels</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Linear-Regression-with-R_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>There are not outliers in the features. Therefore, there is no need to handle them.</p>
+</section>
+</section>
+<section id="data-preprocessing" class="level2">
+<h2 class="anchored" data-anchor-id="data-preprocessing">Data Preprocessing</h2>
+<section id="encode-categoric-features" class="level3">
+<h3 class="anchored" data-anchor-id="encode-categoric-features">1. Encode categoric features</h3>
+<p>I will select categorical columns and apply OneHotEncoding to them:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Encode categorical</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>df.char <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">where</span>(is.character))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>df.char <span class="ot">&lt;-</span> <span class="fu">dummyVars</span>(<span class="st">" ~ ."</span>, <span class="at">data =</span> df.char, <span class="at">fullRank =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">newdata =</span> df.char) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df.char) <span class="ot">&lt;-</span> <span class="fu">make.names</span>(<span class="fu">names</span>(df.char))  <span class="co"># FIX NAMES</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="scale-the-numerical-features" class="level3">
+<h3 class="anchored" data-anchor-id="scale-the-numerical-features">2. Scale the numerical features</h3>
+<p>There are multiple ways to scale the numeric values. The easiest one is base method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>target <span class="ot">=</span> <span class="st">'city_mpg'</span> <span class="co"># exclude the target columns from scaling</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>df.num <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(target))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>df.num<span class="ot">&lt;-</span> <span class="fu">scale</span>(df.num) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>df.num <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  displacement       year   cylinders highway_mpg
+1   -1.2737372 -0.9845592 -1.15013076   0.9119153
+2   -1.2737372 -0.9845592 -1.15013076   0.9119153
+3   -1.1192824  1.0111689 -1.15013076   1.2471783
+4   -1.1192824  1.0111689 -1.15013076   1.0795468
+5   -0.5014632 -0.9845592  0.09400107   0.4090208
+6   -0.5014632 -0.9845592  0.09400107   0.4090208</code></pre>
+</div>
+</div>
+<p>IT returns the list of scaled values of numeric features as dataframe.</p>
+<p>In the following code, I selected target (city_mpg) column from df, and combined it with encoded character columns and scaled numeric columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(target) <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(df.char, df.num) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">invisible</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="multicollinearity" class="level3">
+<h3 class="anchored" data-anchor-id="multicollinearity">3. Multicollinearity</h3>
+<p>To find the multicollinearity between variables, we need to generate a formula which has the following structure: <code>target ~ feature1 + feature2 + feature3 + ... + featuren</code> which means dependency of the target on [feature1,feature2,,,]. Then, that formula is sent to the <code>glm()</code> function, which is Generalized Linear Model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define your target, firstly</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="st">'city_mpg'</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define the features</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>features <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(target)) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># generate the structure of the formula and convert it to formula dtype</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">paste</span>(target, <span class="fu">paste</span>(features, <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="at">sep =</span> <span class="st">" ~ "</span>) <span class="sc">%&gt;%</span> <span class="fu">as.formula</span>()</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co"># build the linear generalized model based on the structured formula. It accepts the formula and apply it on data.</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">data =</span> df)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co"># to beautifully see the model results/structure, we can use tidy function of broom library</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(glm) <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+  term                  estimate std.error statistic  p.value
+  &lt;chr&gt;                    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+1 (Intercept)             13.6       1.59      8.53  8.08e-15
+2 manufacturerchevrolet    0.261     0.677     0.385 7.01e- 1
+3 manufacturerdodge        2.49      1.25      2.00  4.73e- 2
+4 manufacturerford         1.27      1.19      1.07  2.84e- 1
+5 manufacturerhonda        2.68      1.20      2.24  2.67e- 2
+6 manufacturerhyundai      0.703     1.20      0.588 5.57e- 1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">summary</span>(glm)<span class="sc">$</span>coefficients)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Estimate Std. Error   t value     Pr(&gt;|t|)
+(Intercept)           13.5503219   1.587985 8.5330312 8.083315e-15
+manufacturerchevrolet  0.2606905   0.677345 0.3848711 7.008197e-01
+manufacturerdodge      2.4881302   1.245337 1.9979573 4.733486e-02
+manufacturerford       1.2745806   1.186308 1.0744095 2.841799e-01
+manufacturerhonda      2.6819542   1.199646 2.2356210 2.669395e-02
+manufacturerhyundai    0.7030620   1.195235 0.5882207 5.571741e-01</code></pre>
+</div>
+</div>
+<p>The question may appear that what is the relationship between glm model and multicollinearity. For multicollinearity, we need to find VIF (variance inflation score) value for each feature. If the VIF value is greater than 5 then it is a sign of high (perfect) multicollinearity. <code>faraway::vif()</code> function accepts the predictors matrix for the features; <code>glm()</code> function returns the predictors matrix alongside the coefficients. You can investigate the returned results by glm function on the Environment tab in RStudio.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="glm_environment.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in vif.lm(.): Model has non-identifable parameters</code></pre>
+</div>
+</div>
+<p>As is seen, the code returned an error. <code>glm()</code> function returns NA as a coefficient. We need to find those features and remove them to find VIF score for them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alias function will return the features that have perfect multicollinearity</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># attributes function will return rows and columns of the matrices, dataframes. It will return dimnames[[1]] which represents rows, dimnames[[2]] which represents columns</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>coef_na <span class="ot">&lt;-</span> <span class="fu">attributes</span>(<span class="fu">alias</span>(glm)<span class="sc">$</span>Complete)<span class="sc">$</span>dimnames[[<span class="dv">1</span>]]</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>features <span class="ot">&lt;-</span> features[<span class="sc">!</span>features <span class="sc">%in%</span> coef_na]</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>coef_na</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "modela6.quattro"          "modelcivic"              
+ [3] "modelgrand.cherokee.4wd"  "modelgrand.prix"         
+ [5] "modelimpreza.awd"         "modelmalibu"             
+ [7] "modelmountaineer.4wd"     "modelmustang"            
+ [9] "modelnavigator.2wd"       "modelpassat"             
+[11] "modelpathfinder.4wd"      "modelram.1500.pickup.4wd"
+[13] "modelrange.rover"         "modeltiburon"            
+[15] "drive_typef"              "drive_typer"             
+[17] "classminivan"             "classpickup"             
+[19] "classsubcompact"          "classsuv"                </code></pre>
+</div>
+</div>
+<p>Perfectly multicollinear features are removed from the data. Now, we can find the VIF scores for each feature.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># re-build the glm model</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(target, <span class="fu">paste</span>(features, <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="at">sep =</span> <span class="st">" ~ "</span>))</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">data =</span> df)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> T) <span class="sc">%&gt;%</span> <span class="fu">tidy</span>() <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  names                  x
+  &lt;chr&gt;              &lt;dbl&gt;
+1 manufacturertoyota  65.5
+2 manufacturerdodge   63.4
+3 fuel_typer          56.6
+4 classmidsize        53.0
+5 fuel_typep          50.8
+6 manufacturerford    46.2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Iteratively remove features with linear dependencies (NA coefficients)</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>iteration <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span>(<span class="fu">sum</span>(<span class="fu">is.na</span>(<span class="fu">coef</span>(glm))) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> iteration <span class="sc">&lt;</span> <span class="dv">70</span>) {</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  coef_na <span class="ot">&lt;-</span> <span class="fu">attributes</span>(<span class="fu">alias</span>(glm)<span class="sc">$</span>Complete)<span class="sc">$</span>dimnames[[<span class="dv">1</span>]]</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  features <span class="ot">&lt;-</span> features[<span class="sc">!</span>features <span class="sc">%in%</span> coef_na]</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(target, <span class="fu">paste</span>(features, <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="at">sep =</span> <span class="st">" ~ "</span>))</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">data =</span> df)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  iteration <span class="ot">&lt;-</span> iteration <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> T) <span class="sc">%&gt;%</span> <span class="fu">tidy</span>() <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  names                  x
+  &lt;chr&gt;              &lt;dbl&gt;
+1 manufacturertoyota  65.5
+2 manufacturerdodge   63.4
+3 fuel_typer          56.6
+4 classmidsize        53.0
+5 fuel_typep          50.8
+6 manufacturerford    46.2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">'model'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can re-build glm model and find VIF scores:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="st">'city_mpg'</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>features <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(target)) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">paste</span>(target, <span class="fu">paste</span>(features, <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="at">sep =</span> <span class="st">" ~ "</span>) <span class="sc">%&gt;%</span> <span class="fu">as.formula</span>()</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">data =</span> df)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>glm <span class="sc">%&gt;%</span> <span class="fu">tidy</span>() <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+  term                  estimate std.error statistic  p.value
+  &lt;chr&gt;                    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+1 (Intercept)              12.9      1.24      10.5  2.12e-20
+2 manufacturerchevrolet     1.90     0.556      3.42 7.82e- 4
+3 manufacturerdodge         1.58     0.488      3.24 1.44e- 3
+4 manufacturerford          1.77     0.468      3.77 2.18e- 4
+5 manufacturerhonda         3.23     0.550      5.88 1.89e- 8
+6 manufacturerhyundai       1.42     0.520      2.73 6.87e- 3</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">tidy</span>() <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  names            x
+  &lt;chr&gt;        &lt;dbl&gt;
+1 fuel_typer    56.3
+2 fuel_typep    49.8
+3 classsuv      27.4
+4 classcompact  24.6
+5 displacement  20.8
+6 classpickup   20.1</code></pre>
+</div>
+</div>
+<p>We can see from the results that some columns have very high VIF scores, even more than 10. In practice, the features with VIF score higher than 5 are considered as highly multicollinear and they must be removed in linear models. To do that, iteratively obtain the VIF score and remove the features which has more than 5 VIF score. We should do it in <code>while loop</code> because after removing some pairs (or members) of multicollinear features, the VIF score of remaining columns will change. Now remove the highly multicollinear features one by one, iteratively.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span>(glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> .[<span class="dv">1</span>] <span class="sc">&gt;</span> <span class="dv">5</span>){</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  vif_scores <span class="ot">&lt;-</span> glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">length</span>(vif_scores) <span class="sc">&lt;=</span> <span class="dv">1</span>) <span class="cf">break</span>  <span class="co"># Stop if only 1 feature left</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  features_afterVIF <span class="ot">&lt;-</span> <span class="fu">names</span>(vif_scores)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  features_afterVIF <span class="ot">&lt;-</span> <span class="fu">make.names</span>(features_afterVIF) </span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">paste</span>(target, <span class="fu">paste</span>(features_afterVIF, <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="at">sep =</span> <span class="st">" ~ "</span>) <span class="sc">%&gt;%</span> <span class="fu">as.formula</span>()</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">data =</span> df)</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now assign the remaining features with no multicollinearity to the <code>features</code> variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>features <span class="ot">&lt;-</span> glm <span class="sc">%&gt;%</span> <span class="fu">vif</span>() <span class="sc">%&gt;%</span> <span class="fu">sort</span>(<span class="at">decreasing =</span> T) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">all_of</span>(target), features)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df,<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  city_mpg cylinders classcompact classsubcompact drive_typer classmidsize
+1       18 -1.150131            1               0           0            0
+2       21 -1.150131            1               0           0            0
+3       20 -1.150131            1               0           0            0
+  manufacturerchevrolet manufacturertoyota manufacturerford manufacturersubaru
+1                     0                  0                0                  0
+2                     0                  0                0                  0
+3                     0                  0                0                  0
+  manufacturerhyundai classpickup manufacturervolkswagen manufacturerhonda
+1                   0           0                      0                 0
+2                   0           0                      0                 0
+3                   0           0                      0                 0
+  classminivan transmission_typeauto.l5. fuel_typep       year
+1            0                         1          1 -0.9845592
+2            0                         0          1 -0.9845592
+3            0                         0          1  1.0111689
+  transmission_typeauto.s6. manufacturernissan transmission_typemanual.m6.
+1                         0                  0                           0
+2                         0                  0                           0
+3                         0                  0                           1
+  manufacturerlincoln transmission_typemanual.m5. manufacturerpontiac
+1                   0                           0                   0
+2                   0                           1                   0
+3                   0                           0                   0
+  manufacturerjeep transmission_typeauto.l6. transmission_typeauto.s4.
+1                0                         0                         0
+2                0                         0                         0
+3                0                         0                         0
+  manufacturerland.rover manufacturermercury fuel_typee
+1                      0                   0          0
+2                      0                   0          0
+3                      0                   0          0
+  transmission_typeauto.s5. fuel_typed transmission_typeauto.l3.
+1                         0          0                         0
+2                         0          0                         0
+3                         0          0                         0</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="modellng" class="level2">
+<h2 class="anchored" data-anchor-id="modellng">Modellng</h2>
+<section id="prepare-data-for-model" class="level3">
+<h3 class="anchored" data-anchor-id="prepare-data-for-model">1. Prepare data for model</h3>
+<p>Firstly, initialize the h2o model and convert tibbles (dataframes) to h2o data type. Because, that package is built on another programming languages, and requires its special data format to increase the speed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">h2o.init</span>()</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">h2o.no_progress</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>h2o_data <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">as.h2o</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After conversion, split the data into train and test size with the ratio of 0.8 (20 % being test set).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>h2o_data <span class="ot">&lt;-</span> h2o_data <span class="sc">%&gt;%</span> <span class="fu">h2o.splitFrame</span>(<span class="at">ratios =</span> <span class="fl">0.8</span>, <span class="at">seed =</span> <span class="dv">123</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> h2o_data[[<span class="dv">1</span>]]</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">=</span> h2o_data[[<span class="dv">2</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the target and features again:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="st">'city_mpg'</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>features <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>target) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fit-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="fit-the-model">2. Fit the model</h3>
+<p>While working with the VIF scores, glm() function is used to build the linear model. <code>h2o</code> library also builds the linear models with <code>glm()</code> function in a following way:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">h2o.glm</span>(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> features, <span class="at">y =</span> target, <span class="at">training_frame =</span> train, <span class="at">validation_frame =</span> test,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">nfolds =</span> <span class="dv">10</span>, <span class="at">seed =</span> <span class="dv">123</span>, <span class="at">lambda =</span> <span class="dv">0</span>, <span class="at">compute_p_values =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Fitted model generated the intercept and coefficients of the prediction formula. We can explore it in the Environment tab in RStudio.</p>
+<p><img src="model_model.png" class="img-fluid"></p>
+<p>Each feature has its assigned coefficient together with the p-value which indicates how significant (useful) that feature was in prediction. We can eliminate the features with insignificant p value (&gt;0.05), because they don’t have effective role on the prediction. We can investigate the features, coefficients and corresponding p-values using the following formula:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">@</span>model<span class="sc">$</span>coefficients_table <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(names, p_value) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">p_value =</span> <span class="fu">round</span>(p_value,<span class="dv">3</span>)) <span class="sc">%&gt;%</span> .[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">%&gt;%</span> </span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(p_value))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         names p_value
+1          manufacturerhyundai   0.940
+2                  classpickup   0.918
+3             manufacturerford   0.844
+4    transmission_typeauto.l6.   0.822
+5       manufacturerland.rover   0.807
+6  transmission_typemanual.m6.   0.740
+7    transmission_typeauto.s6.   0.714
+8    transmission_typeauto.s4.   0.700
+9             manufacturerjeep   0.616
+10   transmission_typeauto.l3.   0.607
+11         manufacturerpontiac   0.513
+12                  fuel_typep   0.475
+13         manufacturermercury   0.335
+14         manufacturerlincoln   0.320
+15   transmission_typeauto.s5.   0.284
+16                classminivan   0.240
+17                 drive_typer   0.237
+18   transmission_typeauto.l5.   0.212
+19          manufacturersubaru   0.181
+20       manufacturerchevrolet   0.152
+21 transmission_typemanual.m5.   0.094
+22          manufacturernissan   0.060
+23      manufacturervolkswagen   0.046
+24          manufacturertoyota   0.021
+25                        year   0.001
+26                   cylinders   0.000
+27                classcompact   0.000
+28             classsubcompact   0.000
+29                classmidsize   0.000
+30           manufacturerhonda   0.000
+31                  fuel_typee   0.000
+32                  fuel_typed   0.000</code></pre>
+</div>
+</div>
+<p>These are our train results. We did not predict on the test data. For predictions, we want to have only significant and useful features on our hand, thus insignificant features should be removed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (model<span class="sc">@</span>model<span class="sc">$</span>coefficients_table <span class="sc">%&gt;%</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(names, p_value) <span class="sc">%&gt;%</span> .[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">%&gt;%</span> </span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">arrange</span>(<span class="fu">desc</span>(p_value)) <span class="sc">%&gt;%</span> .[<span class="dv">1</span>,<span class="dv">2</span>] <span class="sc">&gt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># condition tells: convert coefficiens table into data.frame; then select names and p_value form it;</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exclude the first row which corresponds to intercept</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sort the rows in the decreasing order of p_value which leads to higher p_values placing at the top</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># take the first-row &amp; second-column which corresponds to the highest p-value in the filtered tibble</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># and check if it is insignificant.</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># If no insignificant feature is left, the while loop will end!</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>    model<span class="sc">@</span>model<span class="sc">$</span>coefficients_table <span class="sc">%&gt;%</span> </span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(names,p_value) <span class="sc">%&gt;%</span></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p_value =</span> <span class="fu">round</span>(p_value,<span class="dv">3</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(p_value)) <span class="sc">%&gt;%</span> </span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>    .[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">%&gt;%</span>  <span class="co">#exclude the first row - intercept</span></span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(p_value)) <span class="sc">%&gt;%</span> </span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>    .[<span class="dv">1</span>,<span class="dv">1</span>] <span class="ot">-&gt;</span> insign_feature </span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>  features <span class="ot">&lt;-</span> features[features<span class="sc">!=</span> insign_feature] <span class="co"># remove insignificant feature</span></span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>  features_ <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"`"</span>, <span class="st">""</span>, features)</span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">=</span> train <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(target, features_) <span class="sc">%&gt;%</span> <span class="fu">as.h2o</span>()</span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">=</span> test <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(target, features_) <span class="sc">%&gt;%</span> <span class="fu">as.h2o</span>()</span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># re-build the model with changed train - test sets</span></span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a>  model <span class="ot">&lt;-</span> <span class="fu">h2o.glm</span>(</span>
+<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> features, <span class="at">y =</span> target, </span>
+<span id="cb57-31"><a href="#cb57-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">training_frame =</span> train, </span>
+<span id="cb57-32"><a href="#cb57-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">validation_frame =</span> test,</span>
+<span id="cb57-33"><a href="#cb57-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">nfolds =</span> <span class="dv">10</span>, <span class="at">seed =</span> <span class="dv">123</span>,</span>
+<span id="cb57-34"><a href="#cb57-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="dv">0</span>, <span class="at">compute_p_values =</span> T</span>
+<span id="cb57-35"><a href="#cb57-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-36"><a href="#cb57-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-37"><a href="#cb57-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Re-observe the features and their corresponding p_values again:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">@</span>model<span class="sc">$</span>coefficients_table <span class="sc">%&gt;%</span> </span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(names, p_value) <span class="sc">%&gt;%</span> .[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">%&gt;%</span> </span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">mutate</span>(<span class="at">p_value =</span> <span class="fu">round</span>(p_value,<span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">arrange</span>(<span class="fu">desc</span>(p_value))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         names p_value
+1  transmission_typemanual.m5.   0.014
+2        manufacturerchevrolet   0.008
+3                         year   0.001
+4                    cylinders   0.000
+5                 classcompact   0.000
+6              classsubcompact   0.000
+7                 classmidsize   0.000
+8            manufacturerhonda   0.000
+9                   fuel_typee   0.000
+10                  fuel_typed   0.000</code></pre>
+</div>
+</div>
+</section>
+<section id="predict-on-the-test-data" class="level3">
+<h3 class="anchored" data-anchor-id="predict-on-the-test-data">3. Predict on the test data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>y_pred <span class="ot">&lt;-</span> model <span class="sc">%&gt;%</span> <span class="fu">h2o.predict</span>(<span class="at">newdata =</span> test) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>y_pred<span class="sc">$</span>predict</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 19.78610 20.65479 17.96005 13.60044 14.27799 15.14667 15.14667 15.03849
+ [9] 11.58325 12.45193  9.16804 12.45193 12.34375 11.58325 12.45193 23.59623
+[17] 25.22541 24.46491 17.77442 19.66625 20.42675 17.84019  9.16804 12.45193
+[25] 11.58325 15.14667 12.45193 20.57733 15.14667 18.60191 19.66625 20.65479
+[33] 21.41529 14.27799 12.45193 21.41529 20.65479 17.09136 19.78610 19.78610
+[41] 21.41529 12.45193 17.73323 20.54661 26.44488 19.30742 25.56452 17.77442</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
+<section id="metrics" class="level3">
+<h3 class="anchored" data-anchor-id="metrics">1. Metrics</h3>
+<p>Firstly, find the errors (residuals) which is equal to difference between actual test data and predicted values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> test <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() </span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>residuals <span class="ot">&lt;-</span> test_data<span class="sc">$</span>city_mpg <span class="sc">-</span> y_pred<span class="sc">$</span>predict</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculate Root Mean Squared Error RMSE:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>RMSE <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(residuals<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculate R2:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>y_test_mean <span class="ot">=</span> <span class="fu">mean</span>(test_data<span class="sc">$</span>city_mpg)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>tss <span class="ot">=</span> <span class="fu">sum</span>((test_data<span class="sc">$</span>city_mpg <span class="sc">-</span> y_test_mean)<span class="sc">^</span><span class="dv">2</span>) <span class="co">#total sum of squares</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>rss <span class="ot">=</span> <span class="fu">sum</span>(residuals<span class="sc">^</span><span class="dv">2</span>) <span class="co">#residual sum of squares</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> <span class="dv">1</span> <span class="sc">-</span> (rss<span class="sc">/</span>tss)</span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>R2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8430277</code></pre>
+</div>
+</div>
+<p>Calculate Adjusted R2:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> test_data <span class="sc">%&gt;%</span> <span class="fu">nrow</span>() </span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> features <span class="sc">%&gt;%</span> <span class="fu">length</span>()</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>Adjusted_R2 <span class="ot">=</span> <span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">-</span>R2)<span class="sc">*</span>((n<span class="dv">-1</span>)<span class="sc">/</span>(n<span class="sc">-</span>k<span class="dv">-1</span>))</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>Adjusted_R2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8006027</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">RMSE =</span> <span class="fu">round</span>(RMSE,<span class="dv">2</span>), R2, Adjusted_R2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+   RMSE    R2 Adjusted_R2
+  &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;
+1  2.13 0.843       0.801</code></pre>
+</div>
+</div>
+<p>Visualize the results:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting actual &amp; predicted ----</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">predicted =</span> y_pred<span class="sc">$</span>predict,</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">observed =</span> test_data<span class="sc">$</span>city_mpg) <span class="sc">%&gt;%</span> </span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> my_data <span class="sc">%&gt;%</span> </span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(predicted, observed)) <span class="sc">+</span> </span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkred"</span>) <span class="sc">+</span> </span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span> </span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Predicted"</span>, </span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="st">"Observed"</span>,</span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">title=</span><span class="fu">glue</span>(<span class="st">'Test: Adjusted R2 = {round(enexpr(Adjusted_R2),2)}'</span>)) <span class="sc">+</span></span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color=</span><span class="st">"darkgreen"</span>,<span class="at">size=</span><span class="dv">16</span>,<span class="at">hjust=</span><span class="fl">0.5</span>),</span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>), </span>
+<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>),</span>
+<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">14</span>), </span>
+<span id="cb70-17"><a href="#cb70-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">14</span>))</span>
+<span id="cb70-18"><a href="#cb70-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-19"><a href="#cb70-19" aria-hidden="true" tabindex="-1"></a>g <span class="sc">%&gt;%</span> <span class="fu">ggplotly</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-24a3b879a3fcfa6b4cec" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-24a3b879a3fcfa6b4cec">{"x":{"data":[{"x":[19.786103243028819,20.654785563807231,17.960046677543865,13.600440540422714,14.277987923136678,15.146670243915093,15.146670243915093,15.038490821689006,11.583249036873308,12.451931357651723,9.1680404580324453,12.451931357651723,12.343751935425637,11.583249036873308,12.451931357651723,23.596225332557239,25.225410551887983,24.464907653335654,17.774415579059877,19.666250037477877,20.426752936030201,17.840193471992922,9.1680404580324453,12.451931357651723,11.583249036873308,15.146670243915093,12.451931357651723,20.577333887549337,15.146670243915093,18.601912028730787,19.666250037477877,20.654785563807231,21.415288462359559,14.277987923136678,12.451931357651723,21.415288462359559,20.654785563807231,17.09136435676545,19.786103243028819,19.786103243028819,21.415288462359559,12.451931357651723,17.733229707952372,20.546606141581144,26.444879008384611,19.307416120675544,25.564522904281347,17.774415579059877],"y":[16,20,15,14,17,17,16,14,11,12,9,13,11,11,12,24,26,24,18,19,19,16,9,13,11,13,13,23,14,20,19,20,19,15,14,21,22,18,24,24,28,13,15,21,33,21,29,18],"text":["predicted: 19.78610<br />observed: 16","predicted: 20.65479<br />observed: 20","predicted: 17.96005<br />observed: 15","predicted: 13.60044<br />observed: 14","predicted: 14.27799<br />observed: 17","predicted: 15.14667<br />observed: 17","predicted: 15.14667<br />observed: 16","predicted: 15.03849<br />observed: 14","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 12","predicted:  9.16804<br />observed:  9","predicted: 12.45193<br />observed: 13","predicted: 12.34375<br />observed: 11","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 12","predicted: 23.59623<br />observed: 24","predicted: 25.22541<br />observed: 26","predicted: 24.46491<br />observed: 24","predicted: 17.77442<br />observed: 18","predicted: 19.66625<br />observed: 19","predicted: 20.42675<br />observed: 19","predicted: 17.84019<br />observed: 16","predicted:  9.16804<br />observed:  9","predicted: 12.45193<br />observed: 13","predicted: 11.58325<br />observed: 11","predicted: 15.14667<br />observed: 13","predicted: 12.45193<br />observed: 13","predicted: 20.57733<br />observed: 23","predicted: 15.14667<br />observed: 14","predicted: 18.60191<br />observed: 20","predicted: 19.66625<br />observed: 19","predicted: 20.65479<br />observed: 20","predicted: 21.41529<br />observed: 19","predicted: 14.27799<br />observed: 15","predicted: 12.45193<br />observed: 14","predicted: 21.41529<br />observed: 21","predicted: 20.65479<br />observed: 22","predicted: 17.09136<br />observed: 18","predicted: 19.78610<br />observed: 24","predicted: 19.78610<br />observed: 24","predicted: 21.41529<br />observed: 28","predicted: 12.45193<br />observed: 13","predicted: 17.73323<br />observed: 15","predicted: 20.54661<br />observed: 21","predicted: 26.44488<br />observed: 33","predicted: 19.30742<br />observed: 21","predicted: 25.56452<br />observed: 29","predicted: 17.77442<br />observed: 18"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(139,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(139,0,0,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[9.1680404580324453,9.3867346168976624,9.6054287757628796,9.8241229346280967,10.042817093493314,10.261511252358531,10.48020541122375,10.698899570088967,10.917593728954184,11.136287887819401,11.354982046684619,11.573676205549836,11.792370364415053,12.01106452328027,12.229758682145487,12.448452841010706,12.667146999875921,12.88584115874114,13.104535317606357,13.323229476471575,13.541923635336792,13.760617794202009,13.979311953067226,14.198006111932443,14.41670027079766,14.635394429662878,14.854088588528096,15.072782747393312,15.291476906258531,15.510171065123746,15.728865223988965,15.947559382854182,16.166253541719399,16.384947700584618,16.603641859449834,16.822336018315053,17.041030177180268,17.259724336045487,17.478418494910706,17.697112653775921,17.915806812641137,18.134500971506355,18.353195130371574,18.57188928923679,18.790583448102005,19.009277606967224,19.227971765832443,19.446665924697658,19.665360083562874,19.884054242428093,20.102748401293312,20.32144256015853,20.540136719023746,20.758830877888961,20.97752503675418,21.196219195619399,21.414913354484614,21.63360751334983,21.852301672215049,22.070995831080268,22.289689989945487,22.508384148810702,22.727078307675917,22.945772466541136,23.164466625406355,23.383160784271571,23.601854943136786,23.820549102002005,24.039243260867224,24.257937419732439,24.476631578597658,24.695325737462873,24.914019896328092,25.132714055193311,25.351408214058523,25.570102372923742,25.788796531788961,26.00749069065418,26.226184849519399,26.444879008384611],"y":[8.4812540559847349,8.7286969045634475,8.9761397531421601,9.2235826017208709,9.4710254502995834,9.718468298878296,9.9659111474570103,10.213353996035721,10.460796844614434,10.708239693193145,10.955682541771857,11.20312539035057,11.45056823892928,11.698011087507993,11.945453936086706,12.192896784665418,12.440339633244129,12.687782481822843,12.935225330401554,13.182668178980267,13.430111027558979,13.67755387613769,13.924996724716403,14.172439573295115,14.419882421873826,14.667325270452537,14.914768119031251,15.162210967609962,15.409653816188676,15.657096664767387,15.904539513346101,16.151982361924812,16.399425210503523,16.646868059082237,16.894310907660948,17.141753756239662,17.389196604818373,17.636639453397084,17.884082301975798,18.131525150554509,18.37896799913322,18.626410847711934,18.873853696290649,19.121296544869356,19.368739393448067,19.616182242026781,19.863625090605495,20.111067939184206,20.358510787762913,20.605953636341628,20.853396484920342,21.100839333499056,21.348282182077767,21.595725030656478,21.843167879235192,22.090610727813903,22.338053576392614,22.585496424971325,22.832939273550039,23.080382122128754,23.327824970707468,23.575267819286175,23.822710667864886,24.0701535164436,24.317596365022315,24.565039213601025,24.812482062179733,25.059924910758447,25.307367759337161,25.554810607915872,25.802253456494586,26.049696305073297,26.297139153652012,26.544582002230722,26.79202485080943,27.039467699388144,27.286910547966858,27.534353396545573,27.781796245124287,28.029239093702991],"text":["predicted:  9.168040<br />observed:  8.481254","predicted:  9.386735<br />observed:  8.728697","predicted:  9.605429<br />observed:  8.976140","predicted:  9.824123<br />observed:  9.223583","predicted: 10.042817<br />observed:  9.471025","predicted: 10.261511<br />observed:  9.718468","predicted: 10.480205<br />observed:  9.965911","predicted: 10.698900<br />observed: 10.213354","predicted: 10.917594<br />observed: 10.460797","predicted: 11.136288<br />observed: 10.708240","predicted: 11.354982<br />observed: 10.955683","predicted: 11.573676<br />observed: 11.203125","predicted: 11.792370<br />observed: 11.450568","predicted: 12.011065<br />observed: 11.698011","predicted: 12.229759<br />observed: 11.945454","predicted: 12.448453<br />observed: 12.192897","predicted: 12.667147<br />observed: 12.440340","predicted: 12.885841<br />observed: 12.687782","predicted: 13.104535<br />observed: 12.935225","predicted: 13.323229<br />observed: 13.182668","predicted: 13.541924<br />observed: 13.430111","predicted: 13.760618<br />observed: 13.677554","predicted: 13.979312<br />observed: 13.924997","predicted: 14.198006<br />observed: 14.172440","predicted: 14.416700<br />observed: 14.419882","predicted: 14.635394<br />observed: 14.667325","predicted: 14.854089<br />observed: 14.914768","predicted: 15.072783<br />observed: 15.162211","predicted: 15.291477<br />observed: 15.409654","predicted: 15.510171<br />observed: 15.657097","predicted: 15.728865<br />observed: 15.904540","predicted: 15.947559<br />observed: 16.151982","predicted: 16.166254<br />observed: 16.399425","predicted: 16.384948<br />observed: 16.646868","predicted: 16.603642<br />observed: 16.894311","predicted: 16.822336<br />observed: 17.141754","predicted: 17.041030<br />observed: 17.389197","predicted: 17.259724<br />observed: 17.636639","predicted: 17.478418<br />observed: 17.884082","predicted: 17.697113<br />observed: 18.131525","predicted: 17.915807<br />observed: 18.378968","predicted: 18.134501<br />observed: 18.626411","predicted: 18.353195<br />observed: 18.873854","predicted: 18.571889<br />observed: 19.121297","predicted: 18.790583<br />observed: 19.368739","predicted: 19.009278<br />observed: 19.616182","predicted: 19.227972<br />observed: 19.863625","predicted: 19.446666<br />observed: 20.111068","predicted: 19.665360<br />observed: 20.358511","predicted: 19.884054<br />observed: 20.605954","predicted: 20.102748<br />observed: 20.853396","predicted: 20.321443<br />observed: 21.100839","predicted: 20.540137<br />observed: 21.348282","predicted: 20.758831<br />observed: 21.595725","predicted: 20.977525<br />observed: 21.843168","predicted: 21.196219<br />observed: 22.090611","predicted: 21.414913<br />observed: 22.338054","predicted: 21.633608<br />observed: 22.585496","predicted: 21.852302<br />observed: 22.832939","predicted: 22.070996<br />observed: 23.080382","predicted: 22.289690<br />observed: 23.327825","predicted: 22.508384<br />observed: 23.575268","predicted: 22.727078<br />observed: 23.822711","predicted: 22.945772<br />observed: 24.070154","predicted: 23.164467<br />observed: 24.317596","predicted: 23.383161<br />observed: 24.565039","predicted: 23.601855<br />observed: 24.812482","predicted: 23.820549<br />observed: 25.059925","predicted: 24.039243<br />observed: 25.307368","predicted: 24.257937<br />observed: 25.554811","predicted: 24.476632<br />observed: 25.802253","predicted: 24.695326<br />observed: 26.049696","predicted: 24.914020<br />observed: 26.297139","predicted: 25.132714<br />observed: 26.544582","predicted: 25.351408<br />observed: 26.792025","predicted: 25.570102<br />observed: 27.039468","predicted: 25.788797<br />observed: 27.286911","predicted: 26.007491<br />observed: 27.534353","predicted: 26.226185<br />observed: 27.781796","predicted: 26.444879<br />observed: 28.029239"],"type":"scatter","mode":"lines","name":"fitted values","line":{"width":3.7795275590551185,"color":"rgba(51,102,255,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[9.1680404580324453,9.3867346168976624,9.6054287757628796,9.8241229346280967,10.042817093493314,10.261511252358531,10.48020541122375,10.698899570088967,10.917593728954184,11.136287887819401,11.354982046684619,11.573676205549836,11.792370364415053,12.01106452328027,12.229758682145487,12.448452841010706,12.667146999875921,12.88584115874114,13.104535317606357,13.323229476471575,13.541923635336792,13.760617794202009,13.979311953067226,14.198006111932443,14.41670027079766,14.635394429662878,14.854088588528096,15.072782747393312,15.291476906258531,15.510171065123746,15.728865223988965,15.947559382854182,16.166253541719399,16.384947700584618,16.603641859449834,16.822336018315053,17.041030177180268,17.259724336045487,17.478418494910706,17.697112653775921,17.915806812641137,18.134500971506355,18.353195130371574,18.57188928923679,18.790583448102005,19.009277606967224,19.227971765832443,19.446665924697658,19.665360083562874,19.884054242428093,20.102748401293312,20.32144256015853,20.540136719023746,20.758830877888961,20.97752503675418,21.196219195619399,21.414913354484614,21.63360751334983,21.852301672215049,22.070995831080268,22.289689989945487,22.508384148810702,22.727078307675917,22.945772466541136,23.164466625406355,23.383160784271571,23.601854943136786,23.820549102002005,24.039243260867224,24.257937419732439,24.476631578597658,24.695325737462873,24.914019896328092,25.132714055193311,25.351408214058523,25.570102372923742,25.788796531788961,26.00749069065418,26.226184849519399,26.444879008384611,26.444879008384611,26.444879008384611,26.226184849519399,26.00749069065418,25.788796531788961,25.570102372923742,25.351408214058523,25.132714055193311,24.914019896328092,24.695325737462873,24.476631578597658,24.257937419732439,24.039243260867224,23.820549102002005,23.601854943136786,23.383160784271571,23.164466625406355,22.945772466541136,22.727078307675917,22.508384148810702,22.289689989945487,22.070995831080268,21.852301672215049,21.63360751334983,21.414913354484614,21.196219195619399,20.97752503675418,20.758830877888961,20.540136719023746,20.32144256015853,20.102748401293312,19.884054242428093,19.665360083562874,19.446665924697658,19.227971765832443,19.009277606967224,18.790583448102005,18.57188928923679,18.353195130371574,18.134500971506355,17.915806812641137,17.697112653775921,17.478418494910706,17.259724336045487,17.041030177180268,16.822336018315053,16.603641859449834,16.384947700584618,16.166253541719399,15.947559382854182,15.728865223988965,15.510171065123746,15.291476906258531,15.072782747393312,14.854088588528096,14.635394429662878,14.41670027079766,14.198006111932443,13.979311953067226,13.760617794202009,13.541923635336792,13.323229476471575,13.104535317606357,12.88584115874114,12.667146999875921,12.448452841010706,12.229758682145487,12.01106452328027,11.792370364415053,11.573676205549836,11.354982046684619,11.136287887819401,10.917593728954184,10.698899570088967,10.48020541122375,10.261511252358531,10.042817093493314,9.8241229346280967,9.6054287757628796,9.3867346168976624,9.1680404580324453,9.1680404580324453],"y":[7.2351728424432249,7.5085837095492156,7.7818202715360556,8.0548709874938247,8.32772336952487,8.6003638958068898,8.8727779158604108,9.1449495475878191,9.416861565732173,9.6884952815310914,9.9598304135287794,10.230844949774998,10.501515002005938,10.771814652893394,11.041715798095284,11.311187985675137,11.580198256514203,11.848710990650549,12.116687766069516,12.384087238350931,12.650865051733936,12.916973794534252,13.182363014322414,13.446979310644931,13.710766525038418,13.973666049224867,14.235617272140113,14.496558184200319,14.756426152293201,15.015158870830192,15.272695482527697,15.528977847602464,15.783951922666851,16.037569192511636,16.289788081659118,16.540575261032508,16.789906761227545,17.037768809808689,17.284158326407127,17.529083034860776,17.772561183002129,18.014620893456204,18.255299198129418,18.494640830898728,18.732696864918832,18.969523282502543,19.205179558038559,19.439727320443595,19.67322914422212,19.905747500145864,20.137343880045734,20.368078096588626,20.598007748767813,20.827187837133661,21.055670509102086,21.283504913379097,21.510737142969667,21.737410247794653,21.963564300127238,22.189236498507714,22.414461298245481,22.639270558907253,22.863693701232009,23.087757867668685,23.311488082200171,23.53490740631419,23.758037088938337,23.980896708905814,24.203504309094384,24.425876521815301,24.648028685348663,24.869974951751566,25.091728386225014,25.313301058431172,25.534704126217587,25.755947912239662,25.977041973985294,26.197995167702505,26.418815706716657,26.639511214602695,26.639511214602695,29.418966972803286,29.144776783531917,28.87071162538864,28.596779121948423,28.322987486536626,28.049345575401272,27.775862946030273,27.502549921079009,27.229417658395029,26.95647822764051,26.683744694016443,26.411231209579938,26.13895311261108,25.866927035421128,25.595171020887861,25.323704647844458,25.052549165218515,24.781727634497763,24.511265079665097,24.241188643169455,23.971527745749793,23.70231424697284,23.433582602147997,23.165370009815561,22.897716542248709,22.630665249368299,22.364262224179296,22.098556615387722,21.833600570409487,21.569449089794951,21.306159772537391,21.043792431303707,20.782408557924818,20.522070623172432,20.262841201551019,20.004781921977301,19.747952258839984,19.49240819445188,19.238200801967665,18.985374815264311,18.733967266248243,18.48400627754447,18.235510096985479,17.988486448409201,17.742932251446817,17.498833733662778,17.256166925652838,17.014898498340195,16.774986876247162,16.536383544164508,16.299034458704583,16.062881480084151,15.827863751019605,15.59391896592239,15.360984491680206,15.128998318709234,14.897899835945299,14.667630435110391,14.438133957741128,14.209357003384023,13.981249119609602,13.753762894733592,13.526853972995138,13.300481009974055,13.0746055836557,12.849192074078127,12.624207522122592,12.399621475852623,12.175405830926142,11.951534670014935,11.727984104855198,11.504732123496694,11.281758444483623,11.05904437905361,10.836572701949702,10.614327531074297,10.392294215947917,10.170459234748265,9.9488100995776794,9.7273352695262449,7.2351728424432249],"text":["predicted:  9.168040<br />observed:  8.481254","predicted:  9.386735<br />observed:  8.728697","predicted:  9.605429<br />observed:  8.976140","predicted:  9.824123<br />observed:  9.223583","predicted: 10.042817<br />observed:  9.471025","predicted: 10.261511<br />observed:  9.718468","predicted: 10.480205<br />observed:  9.965911","predicted: 10.698900<br />observed: 10.213354","predicted: 10.917594<br />observed: 10.460797","predicted: 11.136288<br />observed: 10.708240","predicted: 11.354982<br />observed: 10.955683","predicted: 11.573676<br />observed: 11.203125","predicted: 11.792370<br />observed: 11.450568","predicted: 12.011065<br />observed: 11.698011","predicted: 12.229759<br />observed: 11.945454","predicted: 12.448453<br />observed: 12.192897","predicted: 12.667147<br />observed: 12.440340","predicted: 12.885841<br />observed: 12.687782","predicted: 13.104535<br />observed: 12.935225","predicted: 13.323229<br />observed: 13.182668","predicted: 13.541924<br />observed: 13.430111","predicted: 13.760618<br />observed: 13.677554","predicted: 13.979312<br />observed: 13.924997","predicted: 14.198006<br />observed: 14.172440","predicted: 14.416700<br />observed: 14.419882","predicted: 14.635394<br />observed: 14.667325","predicted: 14.854089<br />observed: 14.914768","predicted: 15.072783<br />observed: 15.162211","predicted: 15.291477<br />observed: 15.409654","predicted: 15.510171<br />observed: 15.657097","predicted: 15.728865<br />observed: 15.904540","predicted: 15.947559<br />observed: 16.151982","predicted: 16.166254<br />observed: 16.399425","predicted: 16.384948<br />observed: 16.646868","predicted: 16.603642<br />observed: 16.894311","predicted: 16.822336<br />observed: 17.141754","predicted: 17.041030<br />observed: 17.389197","predicted: 17.259724<br />observed: 17.636639","predicted: 17.478418<br />observed: 17.884082","predicted: 17.697113<br />observed: 18.131525","predicted: 17.915807<br />observed: 18.378968","predicted: 18.134501<br />observed: 18.626411","predicted: 18.353195<br />observed: 18.873854","predicted: 18.571889<br />observed: 19.121297","predicted: 18.790583<br />observed: 19.368739","predicted: 19.009278<br />observed: 19.616182","predicted: 19.227972<br />observed: 19.863625","predicted: 19.446666<br />observed: 20.111068","predicted: 19.665360<br />observed: 20.358511","predicted: 19.884054<br />observed: 20.605954","predicted: 20.102748<br />observed: 20.853396","predicted: 20.321443<br />observed: 21.100839","predicted: 20.540137<br />observed: 21.348282","predicted: 20.758831<br />observed: 21.595725","predicted: 20.977525<br />observed: 21.843168","predicted: 21.196219<br />observed: 22.090611","predicted: 21.414913<br />observed: 22.338054","predicted: 21.633608<br />observed: 22.585496","predicted: 21.852302<br />observed: 22.832939","predicted: 22.070996<br />observed: 23.080382","predicted: 22.289690<br />observed: 23.327825","predicted: 22.508384<br />observed: 23.575268","predicted: 22.727078<br />observed: 23.822711","predicted: 22.945772<br />observed: 24.070154","predicted: 23.164467<br />observed: 24.317596","predicted: 23.383161<br />observed: 24.565039","predicted: 23.601855<br />observed: 24.812482","predicted: 23.820549<br />observed: 25.059925","predicted: 24.039243<br />observed: 25.307368","predicted: 24.257937<br />observed: 25.554811","predicted: 24.476632<br />observed: 25.802253","predicted: 24.695326<br />observed: 26.049696","predicted: 24.914020<br />observed: 26.297139","predicted: 25.132714<br />observed: 26.544582","predicted: 25.351408<br />observed: 26.792025","predicted: 25.570102<br />observed: 27.039468","predicted: 25.788797<br />observed: 27.286911","predicted: 26.007491<br />observed: 27.534353","predicted: 26.226185<br />observed: 27.781796","predicted: 26.444879<br />observed: 28.029239","predicted: 26.444879<br />observed: 28.029239","predicted: 26.444879<br />observed: 28.029239","predicted: 26.226185<br />observed: 27.781796","predicted: 26.007491<br />observed: 27.534353","predicted: 25.788797<br />observed: 27.286911","predicted: 25.570102<br />observed: 27.039468","predicted: 25.351408<br />observed: 26.792025","predicted: 25.132714<br />observed: 26.544582","predicted: 24.914020<br />observed: 26.297139","predicted: 24.695326<br />observed: 26.049696","predicted: 24.476632<br />observed: 25.802253","predicted: 24.257937<br />observed: 25.554811","predicted: 24.039243<br />observed: 25.307368","predicted: 23.820549<br />observed: 25.059925","predicted: 23.601855<br />observed: 24.812482","predicted: 23.383161<br />observed: 24.565039","predicted: 23.164467<br />observed: 24.317596","predicted: 22.945772<br />observed: 24.070154","predicted: 22.727078<br />observed: 23.822711","predicted: 22.508384<br />observed: 23.575268","predicted: 22.289690<br />observed: 23.327825","predicted: 22.070996<br />observed: 23.080382","predicted: 21.852302<br />observed: 22.832939","predicted: 21.633608<br />observed: 22.585496","predicted: 21.414913<br />observed: 22.338054","predicted: 21.196219<br />observed: 22.090611","predicted: 20.977525<br />observed: 21.843168","predicted: 20.758831<br />observed: 21.595725","predicted: 20.540137<br />observed: 21.348282","predicted: 20.321443<br />observed: 21.100839","predicted: 20.102748<br />observed: 20.853396","predicted: 19.884054<br />observed: 20.605954","predicted: 19.665360<br />observed: 20.358511","predicted: 19.446666<br />observed: 20.111068","predicted: 19.227972<br />observed: 19.863625","predicted: 19.009278<br />observed: 19.616182","predicted: 18.790583<br />observed: 19.368739","predicted: 18.571889<br />observed: 19.121297","predicted: 18.353195<br />observed: 18.873854","predicted: 18.134501<br />observed: 18.626411","predicted: 17.915807<br />observed: 18.378968","predicted: 17.697113<br />observed: 18.131525","predicted: 17.478418<br />observed: 17.884082","predicted: 17.259724<br />observed: 17.636639","predicted: 17.041030<br />observed: 17.389197","predicted: 16.822336<br />observed: 17.141754","predicted: 16.603642<br />observed: 16.894311","predicted: 16.384948<br />observed: 16.646868","predicted: 16.166254<br />observed: 16.399425","predicted: 15.947559<br />observed: 16.151982","predicted: 15.728865<br />observed: 15.904540","predicted: 15.510171<br />observed: 15.657097","predicted: 15.291477<br />observed: 15.409654","predicted: 15.072783<br />observed: 15.162211","predicted: 14.854089<br />observed: 14.914768","predicted: 14.635394<br />observed: 14.667325","predicted: 14.416700<br />observed: 14.419882","predicted: 14.198006<br />observed: 14.172440","predicted: 13.979312<br />observed: 13.924997","predicted: 13.760618<br />observed: 13.677554","predicted: 13.541924<br />observed: 13.430111","predicted: 13.323229<br />observed: 13.182668","predicted: 13.104535<br />observed: 12.935225","predicted: 12.885841<br />observed: 12.687782","predicted: 12.667147<br />observed: 12.440340","predicted: 12.448453<br />observed: 12.192897","predicted: 12.229759<br />observed: 11.945454","predicted: 12.011065<br />observed: 11.698011","predicted: 11.792370<br />observed: 11.450568","predicted: 11.573676<br />observed: 11.203125","predicted: 11.354982<br />observed: 10.955683","predicted: 11.136288<br />observed: 10.708240","predicted: 10.917594<br />observed: 10.460797","predicted: 10.698900<br />observed: 10.213354","predicted: 10.480205<br />observed:  9.965911","predicted: 10.261511<br />observed:  9.718468","predicted: 10.042817<br />observed:  9.471025","predicted:  9.824123<br />observed:  9.223583","predicted:  9.605429<br />observed:  8.976140","predicted:  9.386735<br />observed:  8.728697","predicted:  9.168040<br />observed:  8.481254","predicted:  9.168040<br />observed:  8.481254"],"type":"scatter","mode":"lines","line":{"width":3.7795275590551185,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(153,153,153,0.4)","hoveron":"points","hoverinfo":"x+y","showlegend":false,"xaxis":"x","yaxis":"y","frame":null}],"layout":{"margin":{"t":44.559568285595681,"r":7.3059360730593621,"b":45.496056454960566,"l":45.496056454960566},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Test: Adjusted R2 = 0.8","font":{"color":"rgba(0,100,0,1)","family":"","size":21.253632212536321},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[8.3041985305148369,27.308720935902219],"tickmode":"array","ticktext":["10","15","20","25"],"tickvals":[10,15,20,25],"categoryorder":"array","categoryarray":["10","15","20","25"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":15.940224159402243},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Predicted","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[5.9469314845653862,34.288241357877837],"tickmode":"array","ticktext":["10","15","20","25","30"],"tickvals":[10,15,20,25,30],"categoryorder":"array","categoryarray":["10","15","20","25","30"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":15.940224159402243},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Observed","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"2a414cf2329":{"x":{},"y":{},"type":"scatter"},"2a4413b7416":{"x":{},"y":{}}},"cur_data":"2a414cf2329","visdat":{"2a414cf2329":["function (y) ","x"],"2a4413b7416":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="overfitting" class="level3">
+<h3 class="anchored" data-anchor-id="overfitting">2. Overfitting</h3>
+<p>Overfitting is a problem that the model can predict on the train data quite well - fits properly to the train data, however, performs worse on the test data. It means the model just follows the path of the train data instead of learning and generalizing it. Evidence of the overfitting problem is comparison of metrics on both train and test data. If the R2 (or Adjusted R2) is high on train data, but quite lower on the test data then it is obvious evidence of overfitting problem. If both metrics are low, then it will be called underfitting problem which means the model did not learn anything and hence can not predict well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>y_pred_train <span class="ot">&lt;-</span> model <span class="sc">%&gt;%</span> <span class="fu">h2o.predict</span>(<span class="at">newdata =</span> train) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> train <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>residuals <span class="ot">&lt;-</span>  train_data<span class="sc">$</span>city_mpg <span class="sc">-</span> y_pred_train<span class="sc">$</span>predict</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>RMSE_train <span class="ot">&lt;-</span>  <span class="fu">sqrt</span>(<span class="fu">mean</span>(residuals<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>y_train_mean <span class="ot">&lt;-</span>  <span class="fu">mean</span>(train_data<span class="sc">$</span>city_mpg)</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>tss <span class="ot">&lt;-</span>  <span class="fu">sum</span>((train_data<span class="sc">$</span>city_mpg <span class="sc">-</span> y_train_mean)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>rss <span class="ot">&lt;-</span>  <span class="fu">sum</span>(residuals<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a>R2_train <span class="ot">&lt;-</span>  <span class="dv">1</span> <span class="sc">-</span> (rss<span class="sc">/</span>tss); R2_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8484191</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> train_data <span class="sc">%&gt;%</span> <span class="fu">nrow</span>() <span class="co">#sample size</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> features <span class="sc">%&gt;%</span> <span class="fu">length</span>() <span class="co">#number of independent variables</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>Adjusted_R2_train <span class="ot">&lt;-</span>  <span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">-</span>R2_train)<span class="sc">*</span>((n<span class="dv">-1</span>)<span class="sc">/</span>(n<span class="sc">-</span>k<span class="dv">-1</span>))</span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting actual &amp; predicted</span></span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>my_data_train <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">predicted =</span> y_pred_train<span class="sc">$</span>predict,</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">observed =</span> train_data<span class="sc">$</span>city_mpg) <span class="sc">%&gt;%</span> </span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a><span class="co"># comparison</span></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Test.Adj.R =</span> Adjusted_R2, <span class="at">Train.Adj.R =</span> Adjusted_R2_train) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+  Test.Adj.R Train.Adj.R
+       &lt;dbl&gt;       &lt;dbl&gt;
+1      0.801       0.839</code></pre>
+</div>
+</div>
+<p>According to the results, there is not a big difference on train and test data in terms of prediction. Hence, there is not overfitting problem.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting actual &amp; predicted</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>my_data_train <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">predicted =</span> y_pred_train<span class="sc">$</span>predict,</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">observed =</span> train_data<span class="sc">$</span>city_mpg) <span class="sc">%&gt;%</span> </span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>g_train <span class="ot">&lt;-</span> my_data_train <span class="sc">%&gt;%</span> </span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(predicted, observed)) <span class="sc">+</span> </span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkred"</span>) <span class="sc">+</span> </span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span> </span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Predicted"</span>, </span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="st">"Observed"</span>,</span>
+<span id="cb75-12"><a href="#cb75-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">title=</span><span class="fu">glue</span>(<span class="st">'Train: Adjusted R2 = {round(enexpr(Adjusted_R2_train),2)}'</span>)) <span class="sc">+</span></span>
+<span id="cb75-13"><a href="#cb75-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color=</span><span class="st">"darkgreen"</span>,<span class="at">size=</span><span class="dv">16</span>,<span class="at">hjust=</span><span class="fl">0.5</span>),</span>
+<span id="cb75-14"><a href="#cb75-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>), </span>
+<span id="cb75-15"><a href="#cb75-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>),</span>
+<span id="cb75-16"><a href="#cb75-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">14</span>), </span>
+<span id="cb75-17"><a href="#cb75-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">14</span>))</span>
+<span id="cb75-18"><a href="#cb75-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-19"><a href="#cb75-19" aria-hidden="true" tabindex="-1"></a>g_train <span class="sc">%&gt;%</span> <span class="fu">ggplotly</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-4a501f426983b1d7ef7e" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-4a501f426983b1d7ef7e">{"x":{"data":[{"x":[19.786103243028819,20.546606141581144,20.654785563807231,20.654785563807231,17.09136435676545,17.851867255317778,17.960046677543865,20.546606141581144,20.654785563807231,17.09136435676545,17.851867255317778,17.960046677543865,17.013912680507552,17.882595001285967,15.187856115022598,13.600440540422714,10.316549640803434,12.731758219644298,13.600440540422714,12.731758219644298,12.731758219644298,13.600440540422714,13.600440540422714,13.600440540422714,10.316549640803434,12.731758219644298,18.630031086447769,20.857160749541908,21.725843070320323,18.162421863278542,19.031104184056957,19.031104184056957,16.972726809400047,14.277987923136678,11.862779344295815,14.277987923136678,14.277987923136678,15.146670243915093,15.146670243915093,15.146670243915093,14.277987923136678,12.451931357651723,9.1680404580324453,12.343751935425637,14.277987923136678,12.451931357651723,9.1680404580324453,11.583249036873308,12.451931357651723,11.583249036873308,9.1680404580324453,11.583249036873308,12.451931357651723,11.583249036873308,11.583249036873308,14.277987923136678,15.038490821689006,15.146670243915093,12.451931357651723,11.583249036873308,14.277987923136678,15.038490821689006,12.343751935425637,11.583249036873308,12.451931357651723,11.583249036873308,12.451931357651723,17.732014049766835,16.971511151214507,18.600696370545251,17.840193471992922,14.276772264951138,15.037275163503464,15.905957484281879,15.145454585729553,15.145454585729553,24.356728231109564,24.356728231109564,24.356728231109564,24.464907653335654,24.464907653335654,19.708651566770918,20.469154465323246,20.577333887549337,21.337836786101661,17.013912680507552,17.882595001285967,21.295435256808616,20.534932358256292,17.840193471992922,18.600696370545251,21.044943110718563,15.146670243915093,14.277987923136678,11.583249036873308,12.451931357651723,12.451931357651723,12.451931357651723,12.451931357651723,11.583249036873308,11.583249036873308,11.583249036873308,12.451931357651723,14.277987923136678,11.583249036873308,20.546606141581144,19.786103243028819,20.577333887549337,17.882595001285967,17.882595001285967,17.013912680507552,17.774415579059877,17.882595001285967,14.277987923136678,15.038490821689006,12.451931357651723,17.013912680507552,17.013912680507552,17.013912680507552,17.882595001285967,15.187856115022598,17.733229707952372,16.972726809400047,18.601912028730787,17.841409130178462,17.841409130178462,19.666250037477877,20.426752936030201,20.426752936030201,20.654785563807231,21.415288462359559,17.733229707952372,16.972726809400047,15.038490821689006,15.146670243915093,20.469154465323246,19.708651566770918,21.337836786101661,20.577333887549337,17.013912680507552,17.774415579059877,17.882595001285967,19.786103243028819,20.546606141581144,17.851867255317778,17.960046677543865,20.546606141581144,20.654785563807231,11.583249036873308,16.972726809400047,18.601912028730787,15.038490821689006,14.277987923136678,15.146670243915093,15.146670243915093,19.786103243028819,20.654785563807231,20.654785563807231,17.851867255317778,20.546606141581144,19.786103243028819,20.654785563807231,20.654785563807231,20.067919019227872,17.09136435676545,17.851867255317778,26.325025802833672,20.426752936030201,19.666250037477877,19.948065813676926,19.187562915124602,20.469154465323246,19.708651566770918,20.577333887549337,20.577333887549337,17.013912680507552,17.882595001285967],"y":[18,21,20,21,16,18,18,18,19,15,17,17,15,17,16,14,11,13,12,16,15,16,15,15,11,11,14,19,22,18,18,17,18,16,11,15,15,16,15,14,13,14,9,11,13,13,9,11,13,11,9,11,13,11,11,14,15,13,13,13,14,14,13,13,13,11,13,18,18,17,16,15,15,15,15,14,28,25,23,25,21,18,18,21,21,18,19,20,20,17,17,17,15,15,14,14,11,12,12,11,11,11,12,14,13,21,19,23,19,19,18,19,19,14,15,12,18,16,17,18,16,18,18,19,20,18,21,19,19,20,20,15,16,15,16,21,21,21,21,18,18,19,21,21,18,18,26,26,11,16,17,15,15,15,16,19,21,22,17,21,19,22,21,21,16,17,35,21,19,20,20,21,18,19,21,16,17],"text":["predicted: 19.78610<br />observed: 18","predicted: 20.54661<br />observed: 21","predicted: 20.65479<br />observed: 20","predicted: 20.65479<br />observed: 21","predicted: 17.09136<br />observed: 16","predicted: 17.85187<br />observed: 18","predicted: 17.96005<br />observed: 18","predicted: 20.54661<br />observed: 18","predicted: 20.65479<br />observed: 19","predicted: 17.09136<br />observed: 15","predicted: 17.85187<br />observed: 17","predicted: 17.96005<br />observed: 17","predicted: 17.01391<br />observed: 15","predicted: 17.88260<br />observed: 17","predicted: 15.18786<br />observed: 16","predicted: 13.60044<br />observed: 14","predicted: 10.31655<br />observed: 11","predicted: 12.73176<br />observed: 13","predicted: 13.60044<br />observed: 12","predicted: 12.73176<br />observed: 16","predicted: 12.73176<br />observed: 15","predicted: 13.60044<br />observed: 16","predicted: 13.60044<br />observed: 15","predicted: 13.60044<br />observed: 15","predicted: 10.31655<br />observed: 11","predicted: 12.73176<br />observed: 11","predicted: 18.63003<br />observed: 14","predicted: 20.85716<br />observed: 19","predicted: 21.72584<br />observed: 22","predicted: 18.16242<br />observed: 18","predicted: 19.03110<br />observed: 18","predicted: 19.03110<br />observed: 17","predicted: 16.97273<br />observed: 18","predicted: 14.27799<br />observed: 16","predicted: 11.86278<br />observed: 11","predicted: 14.27799<br />observed: 15","predicted: 14.27799<br />observed: 15","predicted: 15.14667<br />observed: 16","predicted: 15.14667<br />observed: 15","predicted: 15.14667<br />observed: 14","predicted: 14.27799<br />observed: 13","predicted: 12.45193<br />observed: 14","predicted:  9.16804<br />observed:  9","predicted: 12.34375<br />observed: 11","predicted: 14.27799<br />observed: 13","predicted: 12.45193<br />observed: 13","predicted:  9.16804<br />observed:  9","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 13","predicted: 11.58325<br />observed: 11","predicted:  9.16804<br />observed:  9","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 13","predicted: 11.58325<br />observed: 11","predicted: 11.58325<br />observed: 11","predicted: 14.27799<br />observed: 14","predicted: 15.03849<br />observed: 15","predicted: 15.14667<br />observed: 13","predicted: 12.45193<br />observed: 13","predicted: 11.58325<br />observed: 13","predicted: 14.27799<br />observed: 14","predicted: 15.03849<br />observed: 14","predicted: 12.34375<br />observed: 13","predicted: 11.58325<br />observed: 13","predicted: 12.45193<br />observed: 13","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 13","predicted: 17.73201<br />observed: 18","predicted: 16.97151<br />observed: 18","predicted: 18.60070<br />observed: 17","predicted: 17.84019<br />observed: 16","predicted: 14.27677<br />observed: 15","predicted: 15.03728<br />observed: 15","predicted: 15.90596<br />observed: 15","predicted: 15.14545<br />observed: 15","predicted: 15.14545<br />observed: 14","predicted: 24.35673<br />observed: 28","predicted: 24.35673<br />observed: 25","predicted: 24.35673<br />observed: 23","predicted: 24.46491<br />observed: 25","predicted: 24.46491<br />observed: 21","predicted: 19.70865<br />observed: 18","predicted: 20.46915<br />observed: 18","predicted: 20.57733<br />observed: 21","predicted: 21.33784<br />observed: 21","predicted: 17.01391<br />observed: 18","predicted: 17.88260<br />observed: 19","predicted: 21.29544<br />observed: 20","predicted: 20.53493<br />observed: 20","predicted: 17.84019<br />observed: 17","predicted: 18.60070<br />observed: 17","predicted: 21.04494<br />observed: 17","predicted: 15.14667<br />observed: 15","predicted: 14.27799<br />observed: 15","predicted: 11.58325<br />observed: 14","predicted: 12.45193<br />observed: 14","predicted: 12.45193<br />observed: 11","predicted: 12.45193<br />observed: 12","predicted: 12.45193<br />observed: 12","predicted: 11.58325<br />observed: 11","predicted: 11.58325<br />observed: 11","predicted: 11.58325<br />observed: 11","predicted: 12.45193<br />observed: 12","predicted: 14.27799<br />observed: 14","predicted: 11.58325<br />observed: 13","predicted: 20.54661<br />observed: 21","predicted: 19.78610<br />observed: 19","predicted: 20.57733<br />observed: 23","predicted: 17.88260<br />observed: 19","predicted: 17.88260<br />observed: 19","predicted: 17.01391<br />observed: 18","predicted: 17.77442<br />observed: 19","predicted: 17.88260<br />observed: 19","predicted: 14.27799<br />observed: 14","predicted: 15.03849<br />observed: 15","predicted: 12.45193<br />observed: 12","predicted: 17.01391<br />observed: 18","predicted: 17.01391<br />observed: 16","predicted: 17.01391<br />observed: 17","predicted: 17.88260<br />observed: 18","predicted: 15.18786<br />observed: 16","predicted: 17.73323<br />observed: 18","predicted: 16.97273<br />observed: 18","predicted: 18.60191<br />observed: 19","predicted: 17.84141<br />observed: 20","predicted: 17.84141<br />observed: 18","predicted: 19.66625<br />observed: 21","predicted: 20.42675<br />observed: 19","predicted: 20.42675<br />observed: 19","predicted: 20.65479<br />observed: 20","predicted: 21.41529<br />observed: 20","predicted: 17.73323<br />observed: 15","predicted: 16.97273<br />observed: 16","predicted: 15.03849<br />observed: 15","predicted: 15.14667<br />observed: 16","predicted: 20.46915<br />observed: 21","predicted: 19.70865<br />observed: 21","predicted: 21.33784<br />observed: 21","predicted: 20.57733<br />observed: 21","predicted: 17.01391<br />observed: 18","predicted: 17.77442<br />observed: 18","predicted: 17.88260<br />observed: 19","predicted: 19.78610<br />observed: 21","predicted: 20.54661<br />observed: 21","predicted: 17.85187<br />observed: 18","predicted: 17.96005<br />observed: 18","predicted: 20.54661<br />observed: 26","predicted: 20.65479<br />observed: 26","predicted: 11.58325<br />observed: 11","predicted: 16.97273<br />observed: 16","predicted: 18.60191<br />observed: 17","predicted: 15.03849<br />observed: 15","predicted: 14.27799<br />observed: 15","predicted: 15.14667<br />observed: 15","predicted: 15.14667<br />observed: 16","predicted: 19.78610<br />observed: 19","predicted: 20.65479<br />observed: 21","predicted: 20.65479<br />observed: 22","predicted: 17.85187<br />observed: 17","predicted: 20.54661<br />observed: 21","predicted: 19.78610<br />observed: 19","predicted: 20.65479<br />observed: 22","predicted: 20.65479<br />observed: 21","predicted: 20.06792<br />observed: 21","predicted: 17.09136<br />observed: 16","predicted: 17.85187<br />observed: 17","predicted: 26.32503<br />observed: 35","predicted: 20.42675<br />observed: 21","predicted: 19.66625<br />observed: 19","predicted: 19.94807<br />observed: 20","predicted: 19.18756<br />observed: 20","predicted: 20.46915<br />observed: 21","predicted: 19.70865<br />observed: 18","predicted: 20.57733<br />observed: 19","predicted: 20.57733<br />observed: 21","predicted: 17.01391<br />observed: 16","predicted: 17.88260<br />observed: 17"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(139,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(139,0,0,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[9.1680404580324453,9.385217487713474,9.6023945173945009,9.8195715470755296,10.036748576756558,10.253925606437587,10.471102636118614,10.688279665799643,10.905456695480671,11.122633725161698,11.339810754842727,11.556987784523756,11.774164814204784,11.991341843885811,12.20851887356684,12.425695903247869,12.642872932928896,12.860049962609924,13.077226992290953,13.294404021971982,13.51158105165301,13.728758081334037,13.945935111015066,14.163112140696093,14.380289170377122,14.59746620005815,14.814643229739179,15.031820259420208,15.248997289101235,15.466174318782263,15.68335134846329,15.900528378144319,16.117705407825348,16.334882437506376,16.552059467187405,16.76923649686843,16.986413526549462,17.203590556230488,17.420767585911516,17.637944615592545,17.855121645273574,18.072298674954602,18.289475704635628,18.50665273431666,18.723829763997685,18.941006793678714,19.158183823359742,19.375360853040771,19.5925378827218,19.809714912402825,20.026891942083857,20.244068971764882,20.461246001445911,20.67842303112694,20.895600060807968,21.112777090488997,21.329954120170022,21.547131149851054,21.76430817953208,21.981485209213108,22.198662238894137,22.415839268575166,22.633016298256194,22.85019332793722,23.067370357618252,23.284547387299277,23.501724416980306,23.718901446661334,23.936078476342363,24.153255506023392,24.370432535704417,24.587609565385449,24.804786595066474,25.021963624747503,25.239140654428532,25.456317684109557,25.673494713790589,25.890671743471614,26.107848773152647,26.325025802833672],"y":[9.1680404580324684,9.3852174877134971,9.602394517394524,9.8195715470755527,10.036748576756581,10.25392560643761,10.471102636118637,10.688279665799666,10.905456695480694,11.122633725161721,11.33981075484275,11.556987784523779,11.774164814204807,11.991341843885834,12.208518873566865,12.425695903247894,12.64287293292892,12.860049962609949,13.077226992290978,13.294404021972007,13.511581051653035,13.728758081334062,13.945935111015091,14.163112140696118,14.380289170377146,14.597466200058175,14.814643229739204,15.031820259420233,15.24899728910126,15.466174318782288,15.683351348463315,15.900528378144344,16.117705407825373,16.334882437506401,16.55205946718743,16.769236496868455,16.986413526549487,17.203590556230512,17.420767585911541,17.63794461559257,17.855121645273599,18.072298674954627,18.289475704635652,18.506652734316685,18.72382976399771,18.941006793678739,19.158183823359767,19.375360853040796,19.592537882721825,19.80971491240285,20.026891942083882,20.244068971764907,20.461246001445936,20.678423031126965,20.895600060807993,21.112777090489022,21.329954120170047,21.547131149851079,21.764308179532105,21.981485209213133,22.198662238894162,22.415839268575191,22.633016298256219,22.850193327937244,23.067370357618277,23.284547387299302,23.501724416980331,23.718901446661359,23.936078476342388,24.15325550602342,24.370432535704445,24.587609565385478,24.804786595066503,25.021963624747531,25.23914065442856,25.456317684109585,25.673494713790618,25.890671743471643,26.107848773152675,26.3250258028337],"text":["predicted:  9.168040<br />observed:  9.168040","predicted:  9.385217<br />observed:  9.385217","predicted:  9.602395<br />observed:  9.602395","predicted:  9.819572<br />observed:  9.819572","predicted: 10.036749<br />observed: 10.036749","predicted: 10.253926<br />observed: 10.253926","predicted: 10.471103<br />observed: 10.471103","predicted: 10.688280<br />observed: 10.688280","predicted: 10.905457<br />observed: 10.905457","predicted: 11.122634<br />observed: 11.122634","predicted: 11.339811<br />observed: 11.339811","predicted: 11.556988<br />observed: 11.556988","predicted: 11.774165<br />observed: 11.774165","predicted: 11.991342<br />observed: 11.991342","predicted: 12.208519<br />observed: 12.208519","predicted: 12.425696<br />observed: 12.425696","predicted: 12.642873<br />observed: 12.642873","predicted: 12.860050<br />observed: 12.860050","predicted: 13.077227<br />observed: 13.077227","predicted: 13.294404<br />observed: 13.294404","predicted: 13.511581<br />observed: 13.511581","predicted: 13.728758<br />observed: 13.728758","predicted: 13.945935<br />observed: 13.945935","predicted: 14.163112<br />observed: 14.163112","predicted: 14.380289<br />observed: 14.380289","predicted: 14.597466<br />observed: 14.597466","predicted: 14.814643<br />observed: 14.814643","predicted: 15.031820<br />observed: 15.031820","predicted: 15.248997<br />observed: 15.248997","predicted: 15.466174<br />observed: 15.466174","predicted: 15.683351<br />observed: 15.683351","predicted: 15.900528<br />observed: 15.900528","predicted: 16.117705<br />observed: 16.117705","predicted: 16.334882<br />observed: 16.334882","predicted: 16.552059<br />observed: 16.552059","predicted: 16.769236<br />observed: 16.769236","predicted: 16.986414<br />observed: 16.986414","predicted: 17.203591<br />observed: 17.203591","predicted: 17.420768<br />observed: 17.420768","predicted: 17.637945<br />observed: 17.637945","predicted: 17.855122<br />observed: 17.855122","predicted: 18.072299<br />observed: 18.072299","predicted: 18.289476<br />observed: 18.289476","predicted: 18.506653<br />observed: 18.506653","predicted: 18.723830<br />observed: 18.723830","predicted: 18.941007<br />observed: 18.941007","predicted: 19.158184<br />observed: 19.158184","predicted: 19.375361<br />observed: 19.375361","predicted: 19.592538<br />observed: 19.592538","predicted: 19.809715<br />observed: 19.809715","predicted: 20.026892<br />observed: 20.026892","predicted: 20.244069<br />observed: 20.244069","predicted: 20.461246<br />observed: 20.461246","predicted: 20.678423<br />observed: 20.678423","predicted: 20.895600<br />observed: 20.895600","predicted: 21.112777<br />observed: 21.112777","predicted: 21.329954<br />observed: 21.329954","predicted: 21.547131<br />observed: 21.547131","predicted: 21.764308<br />observed: 21.764308","predicted: 21.981485<br />observed: 21.981485","predicted: 22.198662<br />observed: 22.198662","predicted: 22.415839<br />observed: 22.415839","predicted: 22.633016<br />observed: 22.633016","predicted: 22.850193<br />observed: 22.850193","predicted: 23.067370<br />observed: 23.067370","predicted: 23.284547<br />observed: 23.284547","predicted: 23.501724<br />observed: 23.501724","predicted: 23.718901<br />observed: 23.718901","predicted: 23.936078<br />observed: 23.936078","predicted: 24.153256<br />observed: 24.153256","predicted: 24.370433<br />observed: 24.370433","predicted: 24.587610<br />observed: 24.587610","predicted: 24.804787<br />observed: 24.804787","predicted: 25.021964<br />observed: 25.021964","predicted: 25.239141<br />observed: 25.239141","predicted: 25.456318<br />observed: 25.456318","predicted: 25.673495<br />observed: 25.673495","predicted: 25.890672<br />observed: 25.890672","predicted: 26.107849<br />observed: 26.107849","predicted: 26.325026<br />observed: 26.325026"],"type":"scatter","mode":"lines","name":"fitted values","line":{"width":3.7795275590551185,"color":"rgba(51,102,255,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[9.1680404580324453,9.385217487713474,9.6023945173945009,9.8195715470755296,10.036748576756558,10.253925606437587,10.471102636118614,10.688279665799643,10.905456695480671,11.122633725161698,11.339810754842727,11.556987784523756,11.774164814204784,11.991341843885811,12.20851887356684,12.425695903247869,12.642872932928896,12.860049962609924,13.077226992290953,13.294404021971982,13.51158105165301,13.728758081334037,13.945935111015066,14.163112140696093,14.380289170377122,14.59746620005815,14.814643229739179,15.031820259420208,15.248997289101235,15.466174318782263,15.68335134846329,15.900528378144319,16.117705407825348,16.334882437506376,16.552059467187405,16.76923649686843,16.986413526549462,17.203590556230488,17.420767585911516,17.637944615592545,17.855121645273574,18.072298674954602,18.289475704635628,18.50665273431666,18.723829763997685,18.941006793678714,19.158183823359742,19.375360853040771,19.5925378827218,19.809714912402825,20.026891942083857,20.244068971764882,20.461246001445911,20.67842303112694,20.895600060807968,21.112777090488997,21.329954120170022,21.547131149851054,21.76430817953208,21.981485209213108,22.198662238894137,22.415839268575166,22.633016298256194,22.85019332793722,23.067370357618252,23.284547387299277,23.501724416980306,23.718901446661334,23.936078476342363,24.153255506023392,24.370432535704417,24.587609565385449,24.804786595066474,25.021963624747503,25.239140654428532,25.456317684109557,25.673494713790589,25.890671743471614,26.107848773152647,26.325025802833672,26.325025802833672,26.325025802833672,26.107848773152647,25.890671743471614,25.673494713790589,25.456317684109557,25.239140654428532,25.021963624747503,24.804786595066474,24.587609565385449,24.370432535704417,24.153255506023392,23.936078476342363,23.718901446661334,23.501724416980306,23.284547387299277,23.067370357618252,22.85019332793722,22.633016298256194,22.415839268575166,22.198662238894137,21.981485209213108,21.76430817953208,21.547131149851054,21.329954120170022,21.112777090488997,20.895600060807968,20.67842303112694,20.461246001445911,20.244068971764882,20.026891942083857,19.809714912402825,19.5925378827218,19.375360853040771,19.158183823359742,18.941006793678714,18.723829763997685,18.50665273431666,18.289475704635628,18.072298674954602,17.855121645273574,17.637944615592545,17.420767585911516,17.203590556230488,16.986413526549462,16.76923649686843,16.552059467187405,16.334882437506376,16.117705407825348,15.900528378144319,15.68335134846329,15.466174318782263,15.248997289101235,15.031820259420208,14.814643229739179,14.59746620005815,14.380289170377122,14.163112140696093,13.945935111015066,13.728758081334037,13.51158105165301,13.294404021971982,13.077226992290953,12.860049962609924,12.642872932928896,12.425695903247869,12.20851887356684,11.991341843885811,11.774164814204784,11.556987784523756,11.339810754842727,11.122633725161698,10.905456695480671,10.688279665799643,10.471102636118614,10.253925606437587,10.036748576756558,9.8195715470755296,9.6023945173945009,9.385217487713474,9.1680404580324453,9.1680404580324453],"y":[8.6395426726012019,8.86906963978441,9.0985270558083364,9.3279097090443788,9.5572118906579266,9.7864273392106895,10.0155491786482,10.244569848944359,10.473481028640913,10.702273548507245,10.930937295567517,11.159461106815462,11.387832652086077,11.616038305809974,11.844063007782561,12.071890113690515,12.29950123701987,12.526876085203572,12.753992294543435,12.98082527065538,13.207348044019003,13.433531153703457,13.659342576447687,13.88474772280343,14.109709526584224,14.334188657664452,14.558143890110312,14.781532656174207,15.004311810058006,15.226438611850639,15.447871920680733,15.668573557442098,15.88850976434013,16.107652656567325,16.325981538353073,16.543483949432446,16.760156324124754,16.976004183985399,17.191041840245717,17.405291642649711,17.618782863809393,17.83155034238257,18.043633019456959,18.25507249208189,18.465911682201629,18.676193686451722,18.885960839744335,19.09525399831362,19.304112028247541,19.512571473638516,19.720666373132545,19.928428193084695,20.135885847985904,20.343065782866805,20.549992096968733,20.756686692436762,20.963169435772897,21.169458323135913,21.375569643267518,21.581518133914869,21.787317129192388,21.9929786964762,22.198513762241049,22.403932226810625,22.60924306836203,22.814454436755245,23.01957373788866,23.224607709341832,23.429562488079966,23.63444367097625,23.83925636887091,24.044005254837508,24.248694607273027,24.453328348373237,24.657910078500343,24.862443106898347,25.066930479163148,25.271375001829966,25.475779264400522,25.680145659095512,25.680145659095512,26.969905946571888,26.739918281904828,26.509968485113319,26.280058948418088,26.050192261320824,25.820371230356777,25.590598901121826,25.360878582859979,25.131213875933447,24.901608702537981,24.672067341070591,24.442594464604809,24.213195183980886,23.983875096072001,23.754640337843359,23.525497646874523,23.296454429063864,23.067518834271389,22.838699840674181,22.610007348595936,22.381452284511397,22.153046715796691,21.924803976566245,21.696738804567197,21.468867488541282,21.241208024647253,21.013780279387124,20.786606154905968,20.559709750445119,20.333117511035219,20.106858351167183,19.880963737196108,19.655467707767972,19.430406806975199,19.205819900905755,18.981747845793791,18.758232976551479,18.535318389814346,18.313047007526684,18.091460426737804,17.870597588535428,17.650493331577366,17.431176928475626,17.212670728974221,16.994989044304464,16.778137396021787,16.562112218445478,16.346901051310613,16.13248319884659,15.918830776245898,15.705910025713937,15.493682768144513,15.282107862666258,15.071142569368096,14.860743742451898,14.650868814170069,14.441476558588805,14.232527645582495,14.023985008964667,13.815814059287067,13.607982773288633,13.400461690038521,13.193223840016326,12.986244628837971,12.779501692805272,12.572974739351169,12.366645381961694,12.160496976323538,11.954514462232096,11.748684214117983,11.542993901816198,11.337432362320476,11.131989482654973,10.926656093589074,10.721423873664531,10.516285262855236,10.311233385106727,10.106261978980712,9.9013653356425841,9.6965382434637348,8.6395426726012019],"text":["predicted:  9.168040<br />observed:  9.168040","predicted:  9.385217<br />observed:  9.385217","predicted:  9.602395<br />observed:  9.602395","predicted:  9.819572<br />observed:  9.819572","predicted: 10.036749<br />observed: 10.036749","predicted: 10.253926<br />observed: 10.253926","predicted: 10.471103<br />observed: 10.471103","predicted: 10.688280<br />observed: 10.688280","predicted: 10.905457<br />observed: 10.905457","predicted: 11.122634<br />observed: 11.122634","predicted: 11.339811<br />observed: 11.339811","predicted: 11.556988<br />observed: 11.556988","predicted: 11.774165<br />observed: 11.774165","predicted: 11.991342<br />observed: 11.991342","predicted: 12.208519<br />observed: 12.208519","predicted: 12.425696<br />observed: 12.425696","predicted: 12.642873<br />observed: 12.642873","predicted: 12.860050<br />observed: 12.860050","predicted: 13.077227<br />observed: 13.077227","predicted: 13.294404<br />observed: 13.294404","predicted: 13.511581<br />observed: 13.511581","predicted: 13.728758<br />observed: 13.728758","predicted: 13.945935<br />observed: 13.945935","predicted: 14.163112<br />observed: 14.163112","predicted: 14.380289<br />observed: 14.380289","predicted: 14.597466<br />observed: 14.597466","predicted: 14.814643<br />observed: 14.814643","predicted: 15.031820<br />observed: 15.031820","predicted: 15.248997<br />observed: 15.248997","predicted: 15.466174<br />observed: 15.466174","predicted: 15.683351<br />observed: 15.683351","predicted: 15.900528<br />observed: 15.900528","predicted: 16.117705<br />observed: 16.117705","predicted: 16.334882<br />observed: 16.334882","predicted: 16.552059<br />observed: 16.552059","predicted: 16.769236<br />observed: 16.769236","predicted: 16.986414<br />observed: 16.986414","predicted: 17.203591<br />observed: 17.203591","predicted: 17.420768<br />observed: 17.420768","predicted: 17.637945<br />observed: 17.637945","predicted: 17.855122<br />observed: 17.855122","predicted: 18.072299<br />observed: 18.072299","predicted: 18.289476<br />observed: 18.289476","predicted: 18.506653<br />observed: 18.506653","predicted: 18.723830<br />observed: 18.723830","predicted: 18.941007<br />observed: 18.941007","predicted: 19.158184<br />observed: 19.158184","predicted: 19.375361<br />observed: 19.375361","predicted: 19.592538<br />observed: 19.592538","predicted: 19.809715<br />observed: 19.809715","predicted: 20.026892<br />observed: 20.026892","predicted: 20.244069<br />observed: 20.244069","predicted: 20.461246<br />observed: 20.461246","predicted: 20.678423<br />observed: 20.678423","predicted: 20.895600<br />observed: 20.895600","predicted: 21.112777<br />observed: 21.112777","predicted: 21.329954<br />observed: 21.329954","predicted: 21.547131<br />observed: 21.547131","predicted: 21.764308<br />observed: 21.764308","predicted: 21.981485<br />observed: 21.981485","predicted: 22.198662<br />observed: 22.198662","predicted: 22.415839<br />observed: 22.415839","predicted: 22.633016<br />observed: 22.633016","predicted: 22.850193<br />observed: 22.850193","predicted: 23.067370<br />observed: 23.067370","predicted: 23.284547<br />observed: 23.284547","predicted: 23.501724<br />observed: 23.501724","predicted: 23.718901<br />observed: 23.718901","predicted: 23.936078<br />observed: 23.936078","predicted: 24.153256<br />observed: 24.153256","predicted: 24.370433<br />observed: 24.370433","predicted: 24.587610<br />observed: 24.587610","predicted: 24.804787<br />observed: 24.804787","predicted: 25.021964<br />observed: 25.021964","predicted: 25.239141<br />observed: 25.239141","predicted: 25.456318<br />observed: 25.456318","predicted: 25.673495<br />observed: 25.673495","predicted: 25.890672<br />observed: 25.890672","predicted: 26.107849<br />observed: 26.107849","predicted: 26.325026<br />observed: 26.325026","predicted: 26.325026<br />observed: 26.325026","predicted: 26.325026<br />observed: 26.325026","predicted: 26.107849<br />observed: 26.107849","predicted: 25.890672<br />observed: 25.890672","predicted: 25.673495<br />observed: 25.673495","predicted: 25.456318<br />observed: 25.456318","predicted: 25.239141<br />observed: 25.239141","predicted: 25.021964<br />observed: 25.021964","predicted: 24.804787<br />observed: 24.804787","predicted: 24.587610<br />observed: 24.587610","predicted: 24.370433<br />observed: 24.370433","predicted: 24.153256<br />observed: 24.153256","predicted: 23.936078<br />observed: 23.936078","predicted: 23.718901<br />observed: 23.718901","predicted: 23.501724<br />observed: 23.501724","predicted: 23.284547<br />observed: 23.284547","predicted: 23.067370<br />observed: 23.067370","predicted: 22.850193<br />observed: 22.850193","predicted: 22.633016<br />observed: 22.633016","predicted: 22.415839<br />observed: 22.415839","predicted: 22.198662<br />observed: 22.198662","predicted: 21.981485<br />observed: 21.981485","predicted: 21.764308<br />observed: 21.764308","predicted: 21.547131<br />observed: 21.547131","predicted: 21.329954<br />observed: 21.329954","predicted: 21.112777<br />observed: 21.112777","predicted: 20.895600<br />observed: 20.895600","predicted: 20.678423<br />observed: 20.678423","predicted: 20.461246<br />observed: 20.461246","predicted: 20.244069<br />observed: 20.244069","predicted: 20.026892<br />observed: 20.026892","predicted: 19.809715<br />observed: 19.809715","predicted: 19.592538<br />observed: 19.592538","predicted: 19.375361<br />observed: 19.375361","predicted: 19.158184<br />observed: 19.158184","predicted: 18.941007<br />observed: 18.941007","predicted: 18.723830<br />observed: 18.723830","predicted: 18.506653<br />observed: 18.506653","predicted: 18.289476<br />observed: 18.289476","predicted: 18.072299<br />observed: 18.072299","predicted: 17.855122<br />observed: 17.855122","predicted: 17.637945<br />observed: 17.637945","predicted: 17.420768<br />observed: 17.420768","predicted: 17.203591<br />observed: 17.203591","predicted: 16.986414<br />observed: 16.986414","predicted: 16.769236<br />observed: 16.769236","predicted: 16.552059<br />observed: 16.552059","predicted: 16.334882<br />observed: 16.334882","predicted: 16.117705<br />observed: 16.117705","predicted: 15.900528<br />observed: 15.900528","predicted: 15.683351<br />observed: 15.683351","predicted: 15.466174<br />observed: 15.466174","predicted: 15.248997<br />observed: 15.248997","predicted: 15.031820<br />observed: 15.031820","predicted: 14.814643<br />observed: 14.814643","predicted: 14.597466<br />observed: 14.597466","predicted: 14.380289<br />observed: 14.380289","predicted: 14.163112<br />observed: 14.163112","predicted: 13.945935<br />observed: 13.945935","predicted: 13.728758<br />observed: 13.728758","predicted: 13.511581<br />observed: 13.511581","predicted: 13.294404<br />observed: 13.294404","predicted: 13.077227<br />observed: 13.077227","predicted: 12.860050<br />observed: 12.860050","predicted: 12.642873<br />observed: 12.642873","predicted: 12.425696<br />observed: 12.425696","predicted: 12.208519<br />observed: 12.208519","predicted: 11.991342<br />observed: 11.991342","predicted: 11.774165<br />observed: 11.774165","predicted: 11.556988<br />observed: 11.556988","predicted: 11.339811<br />observed: 11.339811","predicted: 11.122634<br />observed: 11.122634","predicted: 10.905457<br />observed: 10.905457","predicted: 10.688280<br />observed: 10.688280","predicted: 10.471103<br />observed: 10.471103","predicted: 10.253926<br />observed: 10.253926","predicted: 10.036749<br />observed: 10.036749","predicted:  9.819572<br />observed:  9.819572","predicted:  9.602395<br />observed:  9.602395","predicted:  9.385217<br />observed:  9.385217","predicted:  9.168040<br />observed:  9.168040","predicted:  9.168040<br />observed:  9.168040"],"type":"scatter","mode":"lines","line":{"width":3.7795275590551185,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(153,153,153,0.4)","hoveron":"points","hoverinfo":"x+y","showlegend":false,"xaxis":"x","yaxis":"y","frame":null}],"layout":{"margin":{"t":44.559568285595681,"r":7.3059360730593621,"b":45.496056454960566,"l":45.496056454960566},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Train: Adjusted R2 = 0.84","font":{"color":"rgba(0,100,0,1)","family":"","size":21.253632212536321},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[8.3101911907923842,27.182875070073734],"tickmode":"array","ticktext":["10","15","20","25"],"tickvals":[10,15,20,25],"categoryorder":"array","categoryarray":["10","15","20","25"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":15.940224159402243},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Predicted","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[7.3215198062312616,36.318022866369937],"tickmode":"array","ticktext":["10","20","30"],"tickvals":[10,20,30],"categoryorder":"array","categoryarray":["10","20","30"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":15.940224159402243},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Observed","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"2a46cf210c9":{"x":{},"y":{},"type":"scatter"},"2a4727d5d2b":{"x":{},"y":{}}},"cur_data":"2a46cf210c9","visdat":{"2a46cf210c9":["function (y) ","x"],"2a4727d5d2b":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>g_train <span class="sc">+</span> g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Linear-Regression-with-R_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

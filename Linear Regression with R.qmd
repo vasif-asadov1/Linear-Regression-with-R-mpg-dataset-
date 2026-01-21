@@ -1,0 +1,580 @@
+---
+title: "Linear Regression with R"
+author: "Vasif Asadov"
+format: 
+  html:
+    theme: darkly
+    toc: true
+    toc-depth: 6
+    toc-location: left
+editor: visual
+execute:
+  echo: true
+  error: true
+  warning: false
+  message: false
+  output: true
+knitr:
+  opts_chunk:
+    progress: false
+    verbose: false
+---
+
+## Preliminary steps:
+
+1.  Import the packages (libraries):
+
+```{r, echo=FALSE, warning=FALSE}
+library(tidyverse)
+library(data.table)
+library(skimr)
+library(inspectdf)
+library(naniar)
+library(mice)
+library(plotly)
+library(highcharter)
+library(caret)
+library(recipes)
+library(Hmisc)
+library(glue)
+library(h2o)
+library(faraway)
+```
+
+
+
+2.  Load the built-in mpg dataset:
+
+```{r}
+mpg <- ggplot2::mpg
+mpg
+```
+
+3.  Investigate the data and features:
+
+```{r}
+colnames(mpg)
+```
+
+Data has the following features:
+
+-   `manufacturer` - Name of car manufacturer
+
+-   `model` - Specific car model name
+
+-   `displ` - Engine displacemeent, measured in liters. Displacement roughly tells you how much air/fuel mixture the engine can burn in one cycle — higher displacement typically means more power but also higher fuel consumption.
+
+-   `year` - Year of manufacture
+
+-   `cyl` - Number of cylinders in the engine.
+
+-   `trans` - Transmission type.
+
+-   `drv` - The drive type. It can be front-wheel, rear-wheel or 4-wheel drive car.
+
+-   `cty` - City miles per gallon (mpg), meaning fuel efficiency when driving in city conditions (lower speeds, more stops).
+
+-   `hwy` - Highway miles per gallon (mpg), efficiency during highway driving (steady speeds, less stopping).
+
+-   `fl` - Fuel type: premium, regular, diesel, ethanol (E85), compressed natural gas (CNG).
+
+-   `class` - Vehicle type/category, e.g. 'compact', 'suv', 'midsize' and etc.
+
+In this project, I will build Linear Regression model to predict the `cty` based on the remaining features. So, the target variable is `cty`. Let's for simplicity, readibility and interpretability, rename the columns and make them clean and meaningful.
+
+4.  Rename column names:
+
+```{r}
+df <- mpg %>% rename(
+  displacement = displ, 
+  cylinders = cyl,
+  transmission_type = trans,
+  drive_type = drv,
+  city_mpg = cty,
+  highway_mpg = hwy,
+  fuel_type = fl
+)
+```
+
+```{r}
+colnames(df)
+```
+
+## Data Cleaning
+
+### 1. Data types:
+
+```{r}
+str(df)
+```
+
+### 2. Missing values. 
+
+We can check missing values with multiple ways, but I prefer doing it by either `naniar` library or `inspectdf` library.
+
+```{r}
+print(miss_var_summary(df))
+# print(inspect_na(df)) # same with miss_var_summary() with slight column name change.
+```
+
+According to the results, the data doesn't have any missing values. Therefore, I will not apply any imputation method.
+
+### 3. Duplicates in the data:
+
+```{r}
+sum(duplicated(df))
+```
+
+There are 9 duplicated rows in the data. Let's see those rows:
+
+```{r}
+df[duplicated(df), ] 
+```
+
+When looking at the results, it is seen that the rows are don't identical to each other. That may confuse us, but be attentive, because these are the copies of the original rows. If it is required to see all duplicated rows including both of thee original and copies, then it is required to write additional parameter `fromLast = TRUE`. That will give all the duplicates.
+
+```{r}
+df[duplicated(df) | duplicated(df, fromLast = TRUE), ] %>% head()
+```
+
+Let's remove the duplicated rows now keeping only one of them and removing the copies.
+
+```{r}
+# df <- distinct(df) # tidyverse library
+df <- df[!duplicated(df),] # base R
+```
+
+Re-check the number of duplicates to see if any duplicated left:
+
+```{r}
+sum(duplicated(df))
+```
+
+### 4. Outliers in the data.
+
+We have three methods to define the outliers: box-plot, Z-score and IQR method. Let's start with box-plot method to visually see if any outliers exist:
+
+```{r}
+num_cols = df %>% select(where(is.numeric)) %>% names()
+```
+
+```{r}
+df %>% 
+  select(all_of(num_cols)) %>% 
+  pivot_longer(
+    cols = everything(),
+    names_to = 'Variable',
+    values_to = 'Value'
+  ) %>% 
+  ggplot(aes(x = Variable, y = Value)) + 
+  geom_boxplot(fill = "steelblue", color = "black") +
+  facet_wrap(~ Variable, scales = "free") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),  # hides repetitive x labels
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 10, face = "bold")
+  )
+
+```
+
+There are not outliers in the features. Therefore, there is no need to handle them.
+
+
+
+## Data Preprocessing
+
+### 1. Encode categoric features
+
+I will select categorical columns and apply OneHotEncoding to them:
+
+```{r}
+# 1. Encode categorical
+df.char <- df %>% select(where(is.character))
+df.char <- dummyVars(" ~ .", data = df.char, fullRank = TRUE) %>% 
+  predict(newdata = df.char) %>% 
+  as.data.frame()
+names(df.char) <- make.names(names(df.char))  # FIX NAMES
+```
+
+### 2. Scale the numerical features
+
+There are multiple ways to scale the numeric values. The easiest one is base method.
+
+```{r}
+target = 'city_mpg' # exclude the target columns from scaling
+
+df.num <- df %>% select(where(is.numeric)) %>% select(-all_of(target))
+df.num<- scale(df.num) %>% as.data.frame()
+df.num %>% head()
+```
+
+IT returns the list of scaled values of numeric features as dataframe.
+
+In the following code, I selected target (city_mpg) column from df, and combined it with encoded character columns and scaled numeric columns.
+
+```{r, results=TRUE}
+
+df <- df %>% select(target) %>% cbind(df.char, df.num) %>% as.data.frame() %>% invisible()
+```
+
+### 3. Multicollinearity
+
+To find the multicollinearity between variables, we need to generate a formula which has the following structure: `target ~ feature1 + feature2 + feature3 + ... + featuren` which means dependency of the target on \[feature1,feature2,,,\]. Then, that formula is sent to the `glm()` function, which is Generalized Linear Model.
+
+```{r}
+# define your target, firstly
+target <- 'city_mpg'
+
+# define the features
+features <- df %>% select(-all_of(target)) %>% names()
+
+# generate the structure of the formula and convert it to formula dtype
+f <- paste(target, paste(features, collapse = " + "), sep = " ~ ") %>% as.formula()
+
+
+# build the linear generalized model based on the structured formula. It accepts the formula and apply it on data.
+glm <- glm(f, data = df)
+
+# to beautifully see the model results/structure, we can use tidy function of broom library
+tidy(glm) %>% head()
+```
+
+```{r}
+head(summary(glm)$coefficients)
+```
+
+The question may appear that what is the relationship between glm model and multicollinearity. For multicollinearity, we need to find VIF (variance inflation score) value for each feature. If the VIF value is greater than 5 then it is a sign of high (perfect) multicollinearity. `faraway::vif()` function accepts the predictors matrix for the features; `glm()` function returns the predictors matrix alongside the coefficients. You can investigate the returned results by glm function on the Environment tab in RStudio.
+
+![](glm_environment.png){width="60%" fig-align="center"}
+
+```{r}
+glm %>% vif() %>% sort(decreasing = TRUE)
+```
+
+As is seen, the code returned an error. `glm()` function returns NA as a coefficient. We need to find those features and remove them to find VIF score for them.
+
+```{r}
+# alias function will return the features that have perfect multicollinearity
+# attributes function will return rows and columns of the matrices, dataframes. It will return dimnames[[1]] which represents rows, dimnames[[2]] which represents columns
+
+coef_na <- attributes(alias(glm)$Complete)$dimnames[[1]]
+features <- features[!features %in% coef_na]
+coef_na
+```
+
+Perfectly multicollinear features are removed from the data. Now, we can find the VIF scores for each feature.
+
+```{r}
+# re-build the glm model
+f <- as.formula(paste(target, paste(features, collapse = " + "), sep = " ~ "))
+glm <- glm(f, data = df)
+glm %>% vif() %>% sort(decreasing = T) %>% tidy() %>% head()
+```
+
+```{r}
+# Iteratively remove features with linear dependencies (NA coefficients)
+iteration <- 0
+while(sum(is.na(coef(glm))) > 0 && iteration < 70) {
+  coef_na <- attributes(alias(glm)$Complete)$dimnames[[1]]
+  features <- features[!features %in% coef_na]
+  f <- as.formula(paste(target, paste(features, collapse = " + "), sep = " ~ "))
+  glm <- glm(f, data = df)
+  iteration <- iteration + 1
+}
+```
+
+```{r}
+glm %>% vif() %>% sort(decreasing = T) %>% tidy() %>% head()
+```
+
+```{r}
+df <- df %>% select(-starts_with('model'))
+```
+
+Now we can re-build glm model and find VIF scores:
+
+```{r}
+
+target <- 'city_mpg'
+features <- df %>% select(-all_of(target)) %>% names()
+
+f <- paste(target, paste(features, collapse = " + "), sep = " ~ ") %>% as.formula()
+glm <- glm(f, data = df)
+glm %>% tidy() %>% head()
+```
+
+```{r}
+glm %>% vif() %>% sort(decreasing = TRUE) %>% tidy() %>% head()
+```
+
+We can see from the results that some columns have very high VIF scores, even more than 10. In practice, the features with VIF score higher than 5 are considered as highly multicollinear and they must be removed in linear models. To do that, iteratively obtain the VIF score and remove the features which has more than 5 VIF score. We should do it in `while loop` because after removing some pairs (or members) of multicollinear features, the VIF score of remaining columns will change. Now remove the highly multicollinear features one by one, iteratively.
+
+```{r}
+while(glm %>% vif() %>% sort(decreasing = TRUE) %>% .[1] > 5){
+  vif_scores <- glm %>% vif() %>% sort(decreasing = TRUE)
+  
+  if(length(vif_scores) <= 1) break  # Stop if only 1 feature left
+  
+  features_afterVIF <- names(vif_scores)[-1]
+  features_afterVIF <- make.names(features_afterVIF) 
+  
+  f <- paste(target, paste(features_afterVIF, collapse = " + "), sep = " ~ ") %>% as.formula()
+  
+  glm <- glm(f, data = df)
+}
+```
+
+
+Now assign the remaining features with no multicollinearity to the `features` variable.
+
+```{r}
+features <- glm %>% vif() %>% sort(decreasing = T) %>% names()
+
+df <- df %>% select(all_of(target), features)
+head(df,3)
+```
+
+## Modellng
+
+### 1. Prepare data for model
+
+Firstly, initialize the h2o model and convert tibbles (dataframes) to h2o data type. Because, that package is built on another programming languages, and requires its special data format to increase the speed.
+
+```{r, results=FALSE}
+h2o.init()
+h2o.no_progress()
+```
+
+```{r}
+h2o_data <- df %>% as.h2o()
+```
+
+After conversion, split the data into train and test size with the ratio of 0.8 (20 % being test set).
+
+```{r}
+h2o_data <- h2o_data %>% h2o.splitFrame(ratios = 0.8, seed = 123)
+```
+
+```{r}
+train = h2o_data[[1]]
+test = h2o_data[[2]]
+```
+
+Define the target and features again:
+
+```{r}
+target <- 'city_mpg'
+features <- df %>% select(-target) %>% names()
+```
+
+
+### 2. Fit the model
+
+While working with the VIF scores, glm() function is used to build the linear model. `h2o` library also builds the linear models with `glm()` function in a following way:
+
+```{r}
+model <- h2o.glm(
+  x = features, y = target, training_frame = train, validation_frame = test,
+  nfolds = 10, seed = 123, lambda = 0, compute_p_values = T)
+```
+
+Fitted model generated the intercept and coefficients of the prediction formula. We can explore it in the Environment tab in RStudio.
+
+![](model_model.png)
+
+Each feature has its assigned coefficient together with the p-value which indicates how significant (useful) that feature was in prediction. We can eliminate the features with insignificant p value (\>0.05), because they don't have effective role on the prediction. We can investigate the features, coefficients and corresponding p-values using the following formula:
+
+```{r}
+model@model$coefficients_table %>% as.data.frame() %>% 
+  select(names, p_value) %>% mutate(p_value = round(p_value,3)) %>% .[-1,] %>% 
+  arrange(desc(p_value))
+```
+
+These are our train results. We did not predict on the test data. For predictions, we want to have only significant and useful features on our hand, thus insignificant features should be removed.
+
+```{r}
+
+while (model@model$coefficients_table %>% 
+       as.data.frame() %>% select(names, p_value) %>% .[-1,] %>% 
+       arrange(desc(p_value)) %>% .[1,2] > 0.05) {
+  
+  # condition tells: convert coefficiens table into data.frame; then select names and p_value form it;
+  # exclude the first row which corresponds to intercept
+  # sort the rows in the decreasing order of p_value which leads to higher p_values placing at the top
+  # take the first-row & second-column which corresponds to the highest p-value in the filtered tibble
+  # and check if it is insignificant.
+  # If no insignificant feature is left, the while loop will end!
+  
+    model@model$coefficients_table %>% 
+    as.data.frame() %>%
+    select(names,p_value) %>%
+    mutate(p_value = round(p_value,3)) %>%
+    filter(!is.nan(p_value)) %>% 
+    .[-1,] %>%  #exclude the first row - intercept
+    arrange(desc(p_value)) %>% 
+    .[1,1] -> insign_feature 
+  
+  features <- features[features!= insign_feature] # remove insignificant feature
+  
+  features_ <- gsub("`", "", features)
+  train = train %>% as.data.frame() %>% select(target, features_) %>% as.h2o()
+  test = test %>% as.data.frame() %>% select(target, features_) %>% as.h2o()
+  
+  # re-build the model with changed train - test sets
+  
+  model <- h2o.glm(
+    x = features, y = target, 
+    training_frame = train, 
+    validation_frame = test,
+    nfolds = 10, seed = 123,
+    lambda = 0, compute_p_values = T
+  )
+  
+}
+
+```
+
+Re-observe the features and their corresponding p_values again:
+
+```{r}
+model@model$coefficients_table %>% 
+       as.data.frame() %>% select(names, p_value) %>% .[-1,] %>% 
+       mutate(p_value = round(p_value,3)) %>% 
+       arrange(desc(p_value))
+```
+
+### 3. Predict on the test data
+
+```{r}
+y_pred <- model %>% h2o.predict(newdata = test) %>% as.data.frame()
+y_pred$predict
+```
+
+## Evaluation
+
+### 1. Metrics
+
+Firstly, find the errors (residuals) which is equal to difference between actual test data and predicted values.
+
+```{r}
+test_data <- test %>% as.data.frame() 
+residuals <- test_data$city_mpg - y_pred$predict
+```
+
+Calculate Root Mean Squared Error RMSE:
+
+```{r}
+RMSE = sqrt(mean(residuals^2))
+```
+
+Calculate R2:
+
+```{r}
+y_test_mean = mean(test_data$city_mpg)
+
+tss = sum((test_data$city_mpg - y_test_mean)^2) #total sum of squares
+rss = sum(residuals^2) #residual sum of squares
+
+R2 = 1 - (rss/tss)
+R2
+```
+
+Calculate Adjusted R2:
+
+```{r}
+n <- test_data %>% nrow() 
+k <- features %>% length()
+Adjusted_R2 = 1-(1-R2)*((n-1)/(n-k-1))
+Adjusted_R2
+```
+
+```{r}
+tibble(RMSE = round(RMSE,2), R2, Adjusted_R2)
+```
+
+Visualize the results:
+
+```{r}
+# Plotting actual & predicted ----
+my_data <- cbind(predicted = y_pred$predict,
+                 observed = test_data$city_mpg) %>% 
+  as.data.frame()
+
+g <- my_data %>% 
+  ggplot(aes(predicted, observed)) + 
+  geom_point(color = "darkred") + 
+  geom_smooth(method=lm) + 
+  labs(x="Predicted", 
+       y="Observed",
+       title=glue('Test: Adjusted R2 = {round(enexpr(Adjusted_R2),2)}')) +
+  theme(plot.title = element_text(color="darkgreen",size=16,hjust=0.5),
+        axis.text.y = element_text(size=12), 
+        axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=14), 
+        axis.title.y = element_text(size=14))
+
+g %>% ggplotly()
+```
+
+### 2. Overfitting
+
+Overfitting is a problem that the model can predict on the train data quite well - fits properly to the train data, however, performs worse on the test data. It means the model just follows the path of the train data instead of learning and generalizing it. Evidence of the overfitting problem is comparison of metrics on both train and test data. If the R2 (or Adjusted R2) is high on train data, but quite lower on the test data then it is obvious evidence of overfitting problem. If both metrics are low, then it will be called underfitting problem which means the model did not learn anything and hence can not predict well.
+
+```{r}
+y_pred_train <- model %>% h2o.predict(newdata = train) %>% as.data.frame()
+
+train_data <- train %>% as.data.frame()
+residuals <-  train_data$city_mpg - y_pred_train$predict
+
+RMSE_train <-  sqrt(mean(residuals^2))
+y_train_mean <-  mean(train_data$city_mpg)
+
+tss <-  sum((train_data$city_mpg - y_train_mean)^2)
+rss <-  sum(residuals^2)
+
+R2_train <-  1 - (rss/tss); R2_train
+
+n <- train_data %>% nrow() #sample size
+k <- features %>% length() #number of independent variables
+Adjusted_R2_train <-  1-(1-R2_train)*((n-1)/(n-k-1))
+
+
+# Plotting actual & predicted
+my_data_train <- cbind(predicted = y_pred_train$predict,
+                       observed = train_data$city_mpg) %>% 
+  as.data.frame()
+
+
+# comparison
+tibble(Test.Adj.R = Adjusted_R2, Train.Adj.R = Adjusted_R2_train) 
+```
+
+According to the results, there is not a big difference on train and test data in terms of prediction. Hence, there is not overfitting problem.
+
+```{r}
+# Plotting actual & predicted
+my_data_train <- cbind(predicted = y_pred_train$predict,
+                       observed = train_data$city_mpg) %>% 
+  as.data.frame()
+
+g_train <- my_data_train %>% 
+  ggplot(aes(predicted, observed)) + 
+  geom_point(color = "darkred") + 
+  geom_smooth(method=lm) + 
+  labs(x="Predicted", 
+       y="Observed",
+       title=glue('Train: Adjusted R2 = {round(enexpr(Adjusted_R2_train),2)}')) +
+  theme(plot.title = element_text(color="darkgreen",size=16,hjust=0.5),
+        axis.text.y = element_text(size=12), 
+        axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=14), 
+        axis.title.y = element_text(size=14))
+
+g_train %>% ggplotly()
+```
+
+```{r}
+library(patchwork)
+g_train + g
+```
